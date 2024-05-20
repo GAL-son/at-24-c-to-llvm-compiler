@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "void main() {int a = 0;}";
+        String code = "float test = 10;";
 
         CharStream stream = CharStreams.fromString(code);
 
@@ -18,6 +18,8 @@ public class Main {
         CParser.CompilationUnitContext compilationUnitContext = cParser.compilationUnit();
         CLLVMVisitor cVisitor = new CLLVMVisitor();
 
-        cVisitor.visit(compilationUnitContext);
+        String res = cVisitor.visit(compilationUnitContext);
+
+        System.out.println(res);
     }
 }

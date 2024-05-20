@@ -172,6 +172,7 @@ declaration
     | staticAssertDeclaration
     ;
 
+/* List of declaration specifiers */
 declarationSpecifiers
     : declarationSpecifier+
     ;
@@ -180,6 +181,7 @@ declarationSpecifiers2
     : declarationSpecifier+
     ;
 
+/** */
 declarationSpecifier
     : storageClassSpecifier
     | typeSpecifier

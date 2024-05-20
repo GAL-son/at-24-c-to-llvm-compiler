@@ -1,22 +1,64 @@
 package com.at24;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.javatuples.Pair;
 
 import com.at24.CParser.DeclarationSpecifierContext;
 import com.at24.CParser.TypeSpecifierContext;
+import com.at24.exceptions.NotSupportedExpessionException;
 import com.at24.translationTools.*;
+import com.at24.visitors.MapVisitor;
 
 public class CLLVMVisitor extends CBaseVisitor<String> {
+
+    // public Map<String, DeclarationData> globalVariables = new HashMap<>();
     
     @Override 
     public String visitDeclaration(CParser.DeclarationContext ctx) { 
-        String declarationSpecifier = visitDeclarationSpecifiers(ctx.declarationSpecifiers());
-        
-        System.out.println(ctx.getText());
-        System.out.println(ctx.declarationSpecifiers().getText());
-        System.out.println(declarationSpecifier);
+        System.out.println("visitDeclaration: " + ctx.getText());
 
-        return "";
+        // staticAssertDeclaration NOT SUPPORTED
+        if(ctx.staticAssertDeclaration() != null) {
+            throw new NotSupportedExpessionException(ctx.staticAssertDeclaration().getText());
+        }
+
+        String result = "";
+        MapVisitor visitor = new MapVisitor();
+        CompoundData declarationData = visitor.visitDeclaration(ctx);
+
+        String type = (String)declarationData.get("rawType");
+        List<CompoundData> vars = (List<CompoundData>)declarationData.get("declarations");
+        for (CompoundData var : vars) {
+            System.out.println(var.get("name"));
+        }
+        // System.out.println(type);
+
+
+        // // declarationSpecifiers initDeclaratorList? ';'
+        // DeclarationVisitor decVis = new DeclarationVisitor();
+        // DeclarationData data = decVis.visitDeclaration(ctx);
+
+
+        // if(data.isFunction) {
+        //     // Define Function
+        //     // Ignore 
+        // }
+
+        // else {
+        //     // Define Variable
+        //     boolean isGlobal = true;
+        //     if(isGlobal) {
+        //         for (Pair<String, String> var : data.namesAndValues) {
+        //             result += VarBuilder.buildGlobal(var.getValue0(), data.type, var.getValue1());
+        //         }
+        //     }
+        // }
+        // System.out.println(result);
+
+        return result;
     }
 
     @Override 
@@ -26,7 +68,7 @@ public class CLLVMVisitor extends CBaseVisitor<String> {
         String resultDeclarationSpecifiers = "";
 
         for (DeclarationSpecifierContext declarationSpecifierContext : contexts) {
-            resultDeclarationSpecifiers = resultDeclarationSpecifiers + visitDeclarationSpecifier(declarationSpecifierContext);
+            resultDeclarationSpecifiers = resultDeclarationSpecifiers + visitDeclarationSpecifier(declarationSpecifierContext) + " ";
         }
 
         return resultDeclarationSpecifiers;

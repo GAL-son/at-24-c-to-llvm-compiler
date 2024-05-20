@@ -15,7 +15,7 @@ public class TypeTranslator {
             case "void":
                 return "void";
         }
-      return "unspecified";
+      return null;
     };
     //type
 
