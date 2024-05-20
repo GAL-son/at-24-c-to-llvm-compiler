@@ -1,6 +1,7 @@
 package com.at24.translationTools;
 
 public class TypeTranslator {
+
     public static String typeConverter(String typeName){
         switch (typeName) {
             case "int":
@@ -17,5 +18,5 @@ public class TypeTranslator {
       return "unspecified";
     };
     //type
-    
+
 }
