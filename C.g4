@@ -166,6 +166,7 @@ constantExpression
     : conditionalExpression
     ;
 
+/** Declarations of variables */
 declaration
     : declarationSpecifiers initDeclaratorList? ';'
     | staticAssertDeclaration

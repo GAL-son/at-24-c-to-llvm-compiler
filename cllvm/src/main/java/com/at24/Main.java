@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "void main() {}";
+        String code = "void main() {int a = 0;}";
 
         CharStream stream = CharStreams.fromString(code);
 
@@ -16,7 +16,7 @@ public class Main {
         CParser cParser = new CParser(commonTokenStream);
 
         CParser.CompilationUnitContext compilationUnitContext = cParser.compilationUnit();
-        CBaseVisitor<String> cVisitor = new CBaseVisitor<String>();
+        CLLVMVisitor cVisitor = new CLLVMVisitor();
 
         cVisitor.visit(compilationUnitContext);
     }
