@@ -1,5 +1,7 @@
 package com.at24;
 
+import com.at24.translationTools.*;
+
 public class CLLVMVisitor extends CBaseVisitor<String> {
     
     // @Override 
@@ -10,23 +12,17 @@ public class CLLVMVisitor extends CBaseVisitor<String> {
     // }
 
     @Override
-    public String visitTypeSpecifier(CParser.TypeSpecifierContext ctx) {
-        String typeName = ctx.getText();
-        String convertedType = "";
-
-        switch (typeName) {
-            case char:
-                
-                break;
+    public String visitDeclarationSpecifier(CParser.DeclarationSpecifierContext ctx) {
         
-            default:
-                break;
-        }
+    }
 
-        // System.out.println(typeName);
+    @Override
+    public String visitTypeSpecifier(CParser.TypeSpecifierContext ctx) {
+        // REGULAR TYPE
+        String typeSpecifier = ctx.getText();
+        String llvmType = TypeTranslator.translateType(typeSpecifier);
 
-
-        return visitChildren(ctx);
+        return llvmType;
     }
 
     
