@@ -61,14 +61,31 @@ public class MapVisitor extends CBaseVisitor<CompoundData> {
 
     public CompoundData visitAssignmentExpression(CParser.AssignmentExpressionContext ctx) {
         CompoundData data = new CompoundData();
-        System.out.println(ctx.DigitSequence());
-        System.out.println(ctx.getText());
+        // System.out.println(ctx.DigitSequence());
+        // System.out.println(ctx.getText());
 
         if(ctx.DigitSequence() != null) {
             data.put("value", ctx.DigitSequence().getText());
             return data;
         }
+
+        if(ctx.conditionalExpression() != null)    {
+            return visitConditionalExpression(ctx.conditionalExpression());
+        }
+
         throw new NotSupportedExpessionException(ctx.getText());
+    }
+
+    @Override
+    public CompoundData visitPrimaryExpression(CParser.PrimaryExpressionContext ctx)  {
+        System.out.println("DDDD");
+        CompoundData data = new CompoundData();
+        if(ctx.Constant() != null) {
+            System.out.println(ctx.Constant().getText());
+            data.put("value", ctx.Constant().getText());
+        }
+
+        return data;
     }
 
     public CompoundData visitDeclarator(CParser.DeclaratorContext ctx) {

@@ -29,12 +29,16 @@ public class CLLVMVisitor extends CBaseVisitor<String> {
         MapVisitor visitor = new MapVisitor();
         CompoundData declarationData = visitor.visitDeclaration(ctx);
 
+        boolean isGlobal = true;
         String type = (String)declarationData.get("rawType");
         List<CompoundData> vars = (List<CompoundData>)declarationData.get("declarations");
         for (CompoundData var : vars) {
-            System.out.println(var.get("name"));
+            if(isGlobal) {
+                result += VarBuilder.buildGlobal((String)var.get("name"), type, (String)var.get("value"));
+            }
         }
         // System.out.println(type);
+
 
 
         // // declarationSpecifiers initDeclaratorList? ';'
@@ -56,7 +60,7 @@ public class CLLVMVisitor extends CBaseVisitor<String> {
         //         }
         //     }
         // }
-        // System.out.println(result);
+        System.out.println(result);
 
         return result;
     }
