@@ -1,143 +1,142 @@
-package com.at24.visitors;
+// package com.at24.visitors;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+// import java.util.HashMap;
+// import java.util.LinkedList;
+// import java.util.List;
+// import java.util.Map;
 
-import com.at24.CBaseVisitor;
-import com.at24.CParser;
-import com.at24.CParser.DeclarationSpecifierContext;
-import com.at24.CParser.InitDeclaratorContext;
-import com.at24.exceptions.NotSupportedExpessionException;
-import com.at24.translationTools.CompoundData;
-import com.at24.translationTools.TypeTranslator;
+// import com.at24.CBaseVisitor;
+// import com.at24.CParser;
+// import com.at24.CParser.DeclarationSpecifierContext;
+// import com.at24.CParser.InitDeclaratorContext;
+// import com.at24.exceptions.NotSupportedExpessionException;
+// import com.at24.translationTools.CompoundData;
+// import com.at24.translationTools.TypeTranslator;
 
-public class MapVisitor extends CBaseVisitor<CompoundData> {
-    public CompoundData visitDeclaration(CParser.DeclarationContext ctx) {
-        CompoundData data = new CompoundData();
-        data.addData(
-            visitDeclarationSpecifiers(ctx.declarationSpecifiers())
-        );        
+// public class MapVisitor extends CBaseVisitor<CompoundData> {
+//     public CompoundData visitDeclaration(CParser.DeclarationContext ctx) {
+//         CompoundData data = new CompoundData();
+//         data.addData(
+//             visitDeclarationSpecifiers(ctx.declarationSpecifiers())
+//         );        
 
-        if(ctx.initDeclaratorList() != null) {
-            data.addData(visitInitDeclaratorList(ctx.initDeclaratorList()));
-        }
+//         if(ctx.initDeclaratorList() != null) {
+//             data.addData(visitInitDeclaratorList(ctx.initDeclaratorList()));
+//         }
 
-        return data;
-    }
+//         return data;
+//     }
 
-    public CompoundData visitInitDeclaratorList(CParser.InitDeclaratorListContext ctx) {
-        CompoundData data = new CompoundData();
-        List<CompoundData> vars = new LinkedList<>();
+//     public CompoundData visitInitDeclaratorList(CParser.InitDeclaratorListContext ctx) {
+//         CompoundData data = new CompoundData();
+//         List<CompoundData> vars = new LinkedList<>();
 
-        for (InitDeclaratorContext initDeclaratorContext : ctx.initDeclarator()) {
-            CompoundData newData = visitInitDeclarator(initDeclaratorContext);
-            vars.add(newData);
+//         for (InitDeclaratorContext initDeclaratorContext : ctx.initDeclarator()) {
+//             CompoundData newData = visitInitDeclarator(initDeclaratorContext);
+//             vars.add(newData);
 
-        }
+//         }
 
-        data.put("declarations", vars);
-        return data;
-    }
+//         data.put("declarations", vars);
+//         return data;
+//     }
 
-    public CompoundData visitInitDeclarator(CParser.InitDeclaratorContext ctx) {
-        CompoundData data = new CompoundData();
-        data.addData(visitDeclarator(ctx.declarator()));
-        if(ctx.initializer() != null) {
-            data.addData(visitInitializer(ctx.initializer()));
-        }
+//     public CompoundData visitInitDeclarator(CParser.InitDeclaratorContext ctx) {
+//         CompoundData data = new CompoundData();
+//         data.addData(visitDeclarator(ctx.declarator()));
+//         if(ctx.initializer() != null) {
+//             data.addData(visitInitializer(ctx.initializer()));
+//         }
         
-        return data;
-    }
+//         return data;
+//     }
 
-    public CompoundData visitInitializer(CParser.InitializerContext ctx) {
-        if(ctx.assignmentExpression() == null) {
-            throw new NotSupportedExpessionException(ctx.getText());
-        }
+//     public CompoundData visitInitializer(CParser.InitializerContext ctx) {
+//         if(ctx.assignmentExpression() == null) {
+//             throw new NotSupportedExpessionException(ctx.getText());
+//         }
 
-        return visitAssignmentExpression(ctx.assignmentExpression());
-    }
+//         return visitAssignmentExpression(ctx.assignmentExpression());
+//     }
 
-    public CompoundData visitAssignmentExpression(CParser.AssignmentExpressionContext ctx) {
-        CompoundData data = new CompoundData();
-        // System.out.println(ctx.DigitSequence());
-        // System.out.println(ctx.getText());
+//     public CompoundData visitAssignmentExpression(CParser.AssignmentExpressionContext ctx) {
+//         CompoundData data = new CompoundData();
+//         // System.out.println(ctx.DigitSequence());
+//         // System.out.println(ctx.getText());
 
-        if(ctx.DigitSequence() != null) {
-            data.put("value", ctx.DigitSequence().getText());
-            return data;
-        }
+//         if(ctx.DigitSequence() != null) {
+//             data.put("value", ctx.DigitSequence().getText());
+//             return data;
+//         }
 
-        if(ctx.conditionalExpression() != null)    {
-            return visitConditionalExpression(ctx.conditionalExpression());
-        }
+//         if(ctx.conditionalExpression() != null)    {
+//             return visitConditionalExpression(ctx.conditionalExpression());
+//         }
 
-        throw new NotSupportedExpessionException(ctx.getText());
-    }
+//         throw new NotSupportedExpessionException(ctx.getText());
+//     }
 
-    @Override
-    public CompoundData visitPrimaryExpression(CParser.PrimaryExpressionContext ctx)  {
-        System.out.println("DDDD");
-        CompoundData data = new CompoundData();
-        if(ctx.Constant() != null) {
-            System.out.println(ctx.Constant().getText());
-            data.put("value", ctx.Constant().getText());
-        }
+//     @Override
+//     public CompoundData visitPrimaryExpression(CParser.PrimaryExpressionContext ctx)  {
+//         CompoundData data = new CompoundData();
+//         if(ctx.Constant() != null) {
+//             System.out.println(ctx.Constant().getText());
+//             data.put("value", ctx.Constant().getText());
+//         }
 
-        return data;
-    }
+//         return data;
+//     }
 
-    public CompoundData visitDeclarator(CParser.DeclaratorContext ctx) {
-        return visitDirectDeclarator(ctx.directDeclarator());
-    }
+//     public CompoundData visitDeclarator(CParser.DeclaratorContext ctx) {
+//         return visitDirectDeclarator(ctx.directDeclarator());
+//     }
 
-    public CompoundData visitDirectDeclarator(CParser.DirectDeclaratorContext ctx) {
-        if(ctx.Identifier() == null) {
-            throw new NotSupportedExpessionException(ctx.getText());
-        }
+//     public CompoundData visitDirectDeclarator(CParser.DirectDeclaratorContext ctx) {
+//         if(ctx.Identifier() == null) {
+//             throw new NotSupportedExpessionException(ctx.getText());
+//         }
         
-        CompoundData data = new CompoundData();
-        data.put("name", ctx.Identifier().getText());
-        return data;
-    }
+//         CompoundData data = new CompoundData();
+//         data.put("name", ctx.Identifier().getText());
+//         return data;
+//     }
 
-    public CompoundData visitDeclarationSpecifiers(CParser.DeclarationSpecifiersContext ctx) {
-        CompoundData data = new CompoundData();
+//     public CompoundData visitDeclarationSpecifiers(CParser.DeclarationSpecifiersContext ctx) {
+//         CompoundData data = new CompoundData();
 
-        for (DeclarationSpecifierContext specifierContext : ctx.declarationSpecifier()) {
-            data.addData(
-                visitDeclarationSpecifier(specifierContext)
-            );
-        }
+//         for (DeclarationSpecifierContext specifierContext : ctx.declarationSpecifier()) {
+//             data.addData(
+//                 visitDeclarationSpecifier(specifierContext)
+//             );
+//         }
 
-        return data;
-    }
+//         return data;
+//     }
 
-    public CompoundData visitDeclarationSpecifier(CParser.DeclarationSpecifierContext ctx) {
-        CompoundData data = new CompoundData();
+//     public CompoundData visitDeclarationSpecifier(CParser.DeclarationSpecifierContext ctx) {
+//         CompoundData data = new CompoundData();
 
-        if(ctx.typeSpecifier() == null) {
-            throw new NotSupportedExpessionException(ctx.getText());
-        }
+//         if(ctx.typeSpecifier() == null) {
+//             throw new NotSupportedExpessionException(ctx.getText());
+//         }
 
-        data.addData(
-            visitTypeSpecifier(ctx.typeSpecifier())  
-        );
-        return data;
-    }
+//         data.addData(
+//             visitTypeSpecifier(ctx.typeSpecifier())  
+//         );
+//         return data;
+//     }
 
-    public CompoundData visitTypeSpecifier(CParser.TypeSpecifierContext ctx) {
-        CompoundData data = new CompoundData();
-        String text = TypeTranslator.typeConverter(ctx.getText());
+//     public CompoundData visitTypeSpecifier(CParser.TypeSpecifierContext ctx) {
+//         CompoundData data = new CompoundData();
+//         String text = TypeTranslator.typeConverter(ctx.getText());
 
-        if(text == null) {
-            throw new NotSupportedExpessionException(ctx.getText());
-        }
-        data.put( 
-            "rawType",
-            text
-        );
-        return data;
-    }
-}
+//         if(text == null) {
+//             throw new NotSupportedExpessionException(ctx.getText());
+//         }
+//         data.put( 
+//             "rawType",
+//             text
+//         );
+//         return data;
+//     }
+// }
