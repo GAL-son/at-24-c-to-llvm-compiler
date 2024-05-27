@@ -1,8 +1,8 @@
-package com.at24.translationTools;
+package com.at24.codeBuilding;
 
 public class TypeTranslator {
-
     public static String typeConverter(String typeName){
+        System.out.println(typeName);
         switch (typeName) {
             case "int":
                 return "i32";

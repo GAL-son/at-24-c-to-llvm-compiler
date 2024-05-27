@@ -12,8 +12,8 @@ import com.at24.CParser.DeclarationContext;
 import com.at24.CParser.DeclarationSpecifierContext;
 import com.at24.CParser.DeclarationSpecifiersContext;
 import com.at24.CParser.TypeSpecifierContext;
+import com.at24.codeBuilding.*;
 import com.at24.exceptions.NotSupportedExpessionException;
-import com.at24.translationTools.*;
 
 public class CLLVMVisitor extends CBaseVisitor<String> {
 
