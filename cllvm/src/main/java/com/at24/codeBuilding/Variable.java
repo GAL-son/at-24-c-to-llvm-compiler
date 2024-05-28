@@ -13,6 +13,7 @@ public class Variable implements Parsable {
     public String identifier;
     public List<String> dependsOn;
     public Expression initializator;
+    public boolean isConst = false;
 
     public boolean isDefined;
 
@@ -37,6 +38,13 @@ public class Variable implements Parsable {
         // type
         JSONObject declarationSpecifiers = variableDeclaration.getJSONObject("declarationSpecifiers");
         this.type = declarationSpecifiers.getString("typeSpecifier");
+        if(declarationSpecifiers.has("typeQualifier")) {
+            String typeQualifier = declarationSpecifiers.getString("typeQualifier");
+
+            if(typeQualifier.equals("const")) {
+                isConst = true;
+            }
+        }
 
         // Value
         JSONObject initializatorJsonObject = getInitializer(variableDeclaration);
@@ -51,10 +59,12 @@ public class Variable implements Parsable {
     @Override
     public String parseGlobal() {
         String base = "";
-        String before = "";
-
         System.out.println(type);
-        base += "@" + this.identifier + " = global " + TypeTranslator.typeConverter(this.type);
+        base += "@" +
+                this.identifier + 
+                " = " +
+                ((isConst) ? "constant" : "global") + " " + 
+                TypeTranslator.typeConverter(this.type);
 
         if (initializator == null || initializator.isNull()) {
             base += "* null";
@@ -64,7 +74,7 @@ public class Variable implements Parsable {
             base += " "+initializator.getValue();
         }
 
-        return before + "\n" + base;
+        return base;
     }
 
     public static boolean isDeclarationVariable(JSONObject declaration) {
