@@ -4,12 +4,13 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import com.at24.codeBuilding.CodeBuilderVisitor;
 import com.at24.visitors.CLLVMVisitor;
 import com.at24.visitors.JSONVisitor;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "const int test = 10;int a = 5; int c=1*5+8;";
+        String code = "int test = null; int x = 9 + 2;";
 
         CharStream stream = CharStreams.fromString(code);
 
@@ -17,9 +18,9 @@ public class Main {
         CommonTokenStream commonTokenStream = new CommonTokenStream(cLexer);
 
         CParser cParser = new CParser(commonTokenStream);
-        JSONVisitor cVisitor = new JSONVisitor();
+        CodeBuilderVisitor cVisitor = new CodeBuilderVisitor();
         cVisitor.visitCompilationUnit(cParser.compilationUnit());
-
-        // System.out.println(res);
+        String parsed = cVisitor.getCode();
+        System.out.println(parsed);
     }
 }
