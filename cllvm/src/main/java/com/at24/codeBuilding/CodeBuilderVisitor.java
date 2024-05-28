@@ -67,7 +67,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> {
         if(currentFunction.hasParam(var)) {
             return true;
         }
-        
+
         if(!vars.containsKey(var)) {
             if(parent == null) {
                 return false;
@@ -86,14 +86,20 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> {
             // Do variable declaration
             declareVariable(declaration);
         } else { // Check for function declaration
-
+            emit("FUNC");
         }
 
         return code;
     }
 
     @Override
-    public String visitFunctionDefinition(FunctionDefinitionContext arg0) {
+    public String visitFunctionDefinition(FunctionDefinitionContext ctx) {
+        JSONVisitor visitor = new JSONVisitor();
+        JSONObject declarationSpecifiers = visitor.visitDeclarationSpecifiers(ctx.declarationSpecifiers());
+        JSONObject declarator = visitor.visitDeclarator(ctx.declarator());
+
+
+
         return code;
     }
 }

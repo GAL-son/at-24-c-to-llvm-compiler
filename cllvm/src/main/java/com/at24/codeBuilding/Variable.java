@@ -78,6 +78,7 @@ public class Variable implements Parsable {
     }
 
     public static boolean isDeclarationVariable(JSONObject declaration) {
+        System.out.println(declaration);
         Set<String> declaratorKeys = getDeclarator(declaration).keySet();
 
         return declaratorKeys.size() == 1;
