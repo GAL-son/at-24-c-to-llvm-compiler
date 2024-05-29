@@ -1,4 +1,3 @@
-
 /*
  [The "BSD licence"]
  Copyright (c) 2013 Sam Harwell
@@ -94,7 +93,11 @@ castExpression
     | unaryExpression
     | DigitSequence // for
     ;
-a
+
+multiplicativeExpression
+    : castExpression (('*' | '/' | '%') castExpression)*
+    ;
+
 additiveExpression
     : multiplicativeExpression (('+' | '-') multiplicativeExpression)*
     ;
