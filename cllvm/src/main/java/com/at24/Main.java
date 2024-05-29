@@ -10,7 +10,7 @@ import com.at24.visitors.JSONVisitor;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "int test = null; const int x = 9; int main();";
+        String code = "int z = 1;";
 
         CharStream stream = CharStreams.fromString(code);
 

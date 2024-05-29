@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.at24.CBaseVisitor;
+import com.at24.CParser;
 import com.at24.CParser.DeclarationContext;
 import com.at24.CParser.FunctionDefinitionContext;
 import com.at24.exceptions.DoubleDeclarationException;
@@ -79,12 +81,20 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> {
         return true;
     }
 
+    private int getLine(ParserRuleContext ctx) {
+        return ctx.getStart().getLine();
+    }
+
     @Override
     public String visitDeclaration(DeclarationContext ctx) {
         JSONObject declaration = new JSONVisitor().visitDeclaration(ctx);
         if(Variable.isDeclarationVariable(declaration)) {
             // Do variable declaration
-            declareVariable(declaration);
+            try {
+                declareVariable(declaration);
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e.getMessage() + " At line: " + getLine(ctx));
+            }
         } else { // Check for function declaration
             emit("FUNC");
         }

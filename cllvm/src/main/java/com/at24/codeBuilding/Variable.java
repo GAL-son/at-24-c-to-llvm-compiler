@@ -14,6 +14,7 @@ public class Variable implements Parsable {
     public List<String> dependsOn;
     public Expression initializator;
     public boolean isConst = false;
+    public int numberOfAssignment = 0;
 
     public boolean isDefined;
 
@@ -51,9 +52,24 @@ public class Variable implements Parsable {
         this.initializator = new Expression(initializatorJsonObject);
     }
 
+    public int getNumberOfAssignments() {
+        return numberOfAssignment;
+    }
+
     @Override
     public String parseLocal() {
-        return "NOT IMPLEMENTED";
+        String variableCode = "";
+
+        String base = "%" + identifier + " = ";
+
+        if(!initializator.isExpression()) {
+            base += "add " + TypeTranslator.typeConverter(type) + " 0, " + initializator.value;
+            variableCode += base;
+        } else {
+            
+        }
+
+        return variableCode;
     }
 
     @Override
@@ -65,6 +81,8 @@ public class Variable implements Parsable {
                 " = " +
                 ((isConst) ? "constant" : "global") + " " + 
                 TypeTranslator.typeConverter(this.type);
+
+        System.out.println(initializator.isExpression());
 
         if (initializator == null || initializator.isNull()) {
             base += "* null";

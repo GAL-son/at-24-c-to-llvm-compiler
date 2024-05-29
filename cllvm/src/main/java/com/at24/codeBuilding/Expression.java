@@ -12,6 +12,7 @@ public class Expression implements Parsable{
     List<Expression> expressions = new LinkedList<>();
 
     public Expression(JSONObject initializer) {
+        System.out.println(initializer);
         if(initializer.has("Constant")) {
             this.value = initializer.getString("Constant");
             return;
@@ -25,7 +26,12 @@ public class Expression implements Parsable{
             }
 
             for(int i = 0; i < arr.length(); i++) {
-                Expression expr = new Expression(arr.getJSONObject(i));
+                JSONObject exprObject = arr.getJSONObject(i);
+                if(exprObject.isEmpty()) {
+                    continue;
+                }
+
+                Expression expr = new Expression(exprObject);
                 expressions.add(expr);
             }
         }
