@@ -3,6 +3,9 @@ package com.at24.visitors;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.at24.CParser;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -17,7 +20,13 @@ import com.at24.CParser.InitDeclaratorListContext;
 import com.at24.CParser.InitializerContext;
 import com.at24.CParser.PrimaryExpressionContext;
 import com.at24.CParser.StructOrUnionSpecifierContext;
+import com.at24.CParser.MultiplicativeExpressionContext;
+import com.at24.CParser.AdditiveExpressionContext;
+import com.at24.CParser.CastExpressionContext;
 import com.at24.exceptions.RepeatedDeclarationSpecifier;
+
+import javax.swing.tree.TreeNode;
+
 
 public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
@@ -121,10 +130,15 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
     @Override
     public JSONObject visitPrimaryExpression(PrimaryExpressionContext ctx) {
         JSONObject primaryExpression = new JSONObject();
+        System.out.println("was-here-primary");
         if(ctx.Constant() != null) {
             primaryExpression.put("Constant", ctx.Constant().getText());
         } else if (ctx.StringLiteral() != null) {
-            
+            //tbd
+        }
+        else if (ctx.Identifier() != null) {
+            System.out.println("was-here-primary-identifier");
+            primaryExpression.put("identifier", ctx.Identifier().getText());
         }
 
         return primaryExpression;
@@ -195,5 +209,54 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
         return result;
     }
+    @Override
+    public JSONObject visitAdditiveExpression(AdditiveExpressionContext ctx) {
+        JSONObject additiveExpr = new JSONObject();
+        JSONArray expressions = new JSONArray();
+        JSONArray operators = new JSONArray();
+
+        for (MultiplicativeExpressionContext multiCtx : ctx.multiplicativeExpression()) {
+            JSONObject multiplicative = visitMultiplicativeExpression(multiCtx);
+            expressions.put(multiplicative);
+        }
+
+        for (ParseTree child : ctx.children) {
+            if (child.getText().equals("+") || child.getText().equals("-")) {
+                operators.put(child.getText());
+            }
+        }
+
+        additiveExpr.put("expressions", expressions);
+        additiveExpr.put("operators", operators);
+
+        return additiveExpr;
+    }
+    @Override
+    public JSONObject visitMultiplicativeExpression(MultiplicativeExpressionContext ctx) {
+        JSONObject multiplicativeExpr = new JSONObject();
+        JSONArray expressions = new JSONArray();
+        JSONArray operators = new JSONArray();
+        System.out.println("--was-here--");
+
+        for (CastExpressionContext castCtx : ctx.castExpression()) {
+            JSONObject cast = visitCastExpression(castCtx);
+            expressions.put(cast);
+            System.out.println("--was-here-cast--");
+        }
+
+        for (ParseTree child : ctx.children) {
+            String text = child.getText();
+            if (text.equals("*") || text.equals("/") || text.equals("%")) {
+                operators.put(text);
+            }
+        }
+
+        multiplicativeExpr.put("expressions", expressions);
+        multiplicativeExpr.put("operators", operators);
+
+        return multiplicativeExpr;
+    }
 }
+
+
  

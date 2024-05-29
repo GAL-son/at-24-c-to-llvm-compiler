@@ -94,11 +94,7 @@ castExpression
     | unaryExpression
     | DigitSequence // for
     ;
-
-multiplicativeExpression
-    : castExpression (('*' | '/' | '%') castExpression)*
-    ;
-
+a
 additiveExpression
     : multiplicativeExpression (('+' | '-') multiplicativeExpression)*
     ;
