@@ -1,4 +1,4 @@
-package com.at24.codeBuilding;
+package com.at24.codeBuilding.codeFeatures;
 
 public interface Parsable {
     public String parseLocal();

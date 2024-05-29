@@ -1,4 +1,4 @@
-package com.at24.codeBuilding;
+package com.at24.codeBuilding.codeFeatures;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -7,6 +7,8 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.at24.codeBuilding.TypeTranslator;
 
 public class Variable implements Parsable {
     public String type;
@@ -94,6 +96,8 @@ public class Variable implements Parsable {
 
         return base;
     }
+
+    
 
     public static boolean isDeclarationVariable(JSONObject declaration) {
         System.out.println(declaration);

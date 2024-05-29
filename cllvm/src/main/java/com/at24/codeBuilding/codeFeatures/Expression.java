@@ -1,4 +1,4 @@
-package com.at24.codeBuilding;
+package com.at24.codeBuilding.codeFeatures;
 
 import java.util.LinkedList;
 import java.util.List;

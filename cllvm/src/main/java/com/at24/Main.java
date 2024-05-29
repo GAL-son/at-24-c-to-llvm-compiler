@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import com.at24.codeBuilding.CodeBuilderVisitor;
 import com.at24.visitors.CLLVMVisitor;
 import com.at24.visitors.JSONVisitor;
 
@@ -17,9 +18,9 @@ public class Main {
         CommonTokenStream commonTokenStream = new CommonTokenStream(cLexer);
 
         CParser cParser = new CParser(commonTokenStream);
-        JSONVisitor cVisitor = new JSONVisitor();
+        CodeBuilderVisitor cVisitor = new CodeBuilderVisitor();
         cVisitor.visitCompilationUnit(cParser.compilationUnit());
 
-        // System.out.println(res);
+        System.out.println(cVisitor.getCode());
     }
 }
