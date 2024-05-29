@@ -1,8 +1,7 @@
 package com.at24.codeBuilding;
 
-public class TypeTranslator {
+public class CodeTranslator {
     public static String typeConverter(String typeName){
-        System.out.println(typeName);
         switch (typeName) {
             case "int":
                 return "i32";
@@ -18,5 +17,16 @@ public class TypeTranslator {
       return null;
     };
     //type
+
+    public static String operationConverter(String operation) {
+        switch (operation) {
+            case "+":
+                return "add";
+
+        
+            default:
+                return "";
+        }
+    }
 
 }

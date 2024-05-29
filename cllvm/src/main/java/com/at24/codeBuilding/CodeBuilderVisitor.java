@@ -13,8 +13,10 @@ import com.at24.CParser;
 import com.at24.CParser.DeclarationContext;
 import com.at24.CParser.FunctionDefinitionContext;
 import com.at24.codeBuilding.codeFeatures.CodeContext;
+import com.at24.codeBuilding.codeFeatures.Expression;
 import com.at24.codeBuilding.codeFeatures.Function;
-import com.at24.codeBuilding.codeFeatures.Variable;
+import com.at24.codeBuilding.codeFeatures.variables.Variable;
+import com.at24.codeBuilding.codeFeatures.variables.VariableTreeReader;
 import com.at24.exceptions.DoubleDeclarationException;
 import com.at24.visitors.JSONVisitor;
 
@@ -22,17 +24,25 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     String code;
     Map<String, Variable> vars;
     Map<String, Function> funcs;
+    Map<Expression, String> regs;
     CodeBuilderVisitor parent = null;
     Function currentFunction = null;
+
+    int registerNumber = 1;
 
     public CodeBuilderVisitor() {
         code = "";
         vars = new HashMap<>();
     }
 
-    public CodeBuilderVisitor(CodeBuilderVisitor parent, Function func) {
-        super();
+    public CodeBuilderVisitor(CodeBuilderVisitor parent) {
+        this();
         this.parent = parent;
+        registerNumber = parent.registerNumber;
+    }
+
+    public CodeBuilderVisitor(CodeBuilderVisitor parent, Function func) {
+        this(parent);
         currentFunction = func;
     }
 
@@ -42,15 +52,23 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
     @Override
     public void emit(String emit) {
+        if(!isGlobal()) {
+            parent.emit(emit);
+            return;
+        }
         code += emit + "\n";
     }
 
     @Override
     public Variable searchVariable(String variableName) {
+        if(currentFunction.hasParam(variableName)) {
+            return null;
+        }
+
         // Search variable in current context
         if (vars.containsKey(variableName)) {
             return vars.get(variableName);
-        } else if (parent == null) { 
+        } else if (isGlobal()) { 
             // At root - Var does not exist
             return null;
         } else {
@@ -62,10 +80,11 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     @Override
     public Function searchFunction(String functionName) {
         // Go to root context
-        if (parent != null) {
+        if (!isGlobal()) {
             return parent.searchFunction(functionName);
         }
 
+        // In root context search for Function names
         if(funcs.containsKey(functionName)) {
             return funcs.get(functionName);
         } else {
@@ -73,12 +92,40 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         }
     }
 
+    @Override
+    public boolean isGlobal() {
+        return parent == null;
+    }
+
+    @Override
+    public String getRegisterName(Expression expression) {
+        if(regs.containsKey(expression)) {
+            return regs.get(expression);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String borrowRegister() {
+        return Integer.toString(registerNumber++);
+    }
+
+    @Override
+    public String assignRegister(Expression expression) {
+        regs.put(expression, Integer.toString(registerNumber++));
+        return regs.get(expression);
+    }
+
     private void declareVariable(JSONObject variableDeclaration) {
         Variable var = new Variable(variableDeclaration);
+
+        // If current context has double declaration
         if (vars.containsKey(var.identifier)) {
             throw new DoubleDeclarationException();
         }
 
+        // TODO: this shoud be inside variable
         if (var.dependsOn != null && var.dependsOn.size() > 0) {
             for (String dependVariable : var.dependsOn) {
                 if (!variableExists(dependVariable)) {
@@ -88,13 +135,8 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         }
 
         vars.put(var.identifier, var);
-
-        if (parent == null) {
-            // Global context
-            emit(var.parseGlobal());
-        } else {
-            emit(var.parseLocal());
-        }
+        var.parse(this);
+        var.readFomVariable(this);
     }
 
     public boolean variableExists(String var) {
@@ -119,8 +161,9 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
     @Override
     public String visitDeclaration(DeclarationContext ctx) {
+        System.out.println("CODE BUILDER + " + ctx.getText());
         JSONObject declaration = new JSONVisitor().visitDeclaration(ctx);
-        if (Variable.isDeclarationVariable(declaration)) {
+        if (VariableTreeReader.isDeclarationVariable(declaration)) {
             // Do variable declaration
             try {
                 declareVariable(declaration);
@@ -134,13 +177,15 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         return code;
     }
 
-    @Override
-    public String visitFunctionDefinition(FunctionDefinitionContext ctx) {
-        JSONVisitor visitor = new JSONVisitor();
-        JSONObject declarationSpecifiers = visitor.visitDeclarationSpecifiers(ctx.declarationSpecifiers());
-        JSONObject declarator = visitor.visitDeclarator(ctx.declarator());
+    // @Override
+    // public String visitFunctionDefinition(FunctionDefinitionContext ctx) {
+    //     JSONVisitor visitor = new JSONVisitor();
+    //     JSONObject declarationSpecifiers = visitor.visitDeclarationSpecifiers(ctx.declarationSpecifiers());
+    //     JSONObject declarator = visitor.visitDeclarator(ctx.declarator());
 
-        return code;
-    }
+    //     return code;
+    // }
+
+    
 
 }
