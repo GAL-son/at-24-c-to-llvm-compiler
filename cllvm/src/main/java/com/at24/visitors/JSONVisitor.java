@@ -4,25 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.at24.CParser;
+import com.at24.CParser.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.at24.CBaseVisitor;
-import com.at24.CParser.DeclarationContext;
-import com.at24.CParser.DeclarationSpecifierContext;
-import com.at24.CParser.DeclarationSpecifiersContext;
-import com.at24.CParser.DeclaratorContext;
-import com.at24.CParser.DirectDeclaratorContext;
-import com.at24.CParser.InitDeclaratorContext;
-import com.at24.CParser.InitDeclaratorListContext;
-import com.at24.CParser.InitializerContext;
-import com.at24.CParser.PrimaryExpressionContext;
-import com.at24.CParser.StructOrUnionSpecifierContext;
-import com.at24.CParser.MultiplicativeExpressionContext;
-import com.at24.CParser.AdditiveExpressionContext;
-import com.at24.CParser.CastExpressionContext;
 import com.at24.exceptions.RepeatedDeclarationSpecifier;
 
 import javax.swing.tree.TreeNode;
@@ -109,12 +97,64 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
         if (ctx.Identifier() != null) {
             directDeclarator.put("Identifier", ctx.Identifier().getText());
-        } else if (ctx.declarator() != null) {
-            return visitDeclarator(ctx.declarator());
         }
+        else if (ctx.declarator() != null)
+        {
+            directDeclarator.put("Declarator", visitDeclarator(ctx.declarator()));
+        }
+        else if (ctx.directDeclarator() != null)
+        {
+            directDeclarator.put("DirectDeclarator", visitDirectDeclarator(ctx.directDeclarator()));
+            if (ctx.identifierList() != null)
+            {
+                directDeclarator.put("IdentifierList", visitIdentifierList(ctx.identifierList()));
+            }
+            else if (ctx.parameterTypeList()!=null){
+                directDeclarator.put("parameters", visitParameterTypeList(ctx.parameterTypeList()));
+            }
+        }
+
+
 
         return directDeclarator;
     }
+    //check later
+    @Override
+    public JSONObject visitParameterList(ParameterListContext ctx){
+
+        JSONObject parameterList=new JSONObject();
+        JSONArray parameters=new JSONArray();
+        for(ParameterDeclarationContext pctx:ctx.parameterDeclaration()){
+            JSONObject parameter=visitParameterDeclaration(pctx);
+            parameters.put(parameter);
+        }
+      parameterList.put("parameters",parameters);
+
+
+        return parameterList;
+    }
+
+    @Override
+    public JSONObject visitParameterDeclaration(ParameterDeclarationContext ctx){
+
+        JSONObject Parameter=new JSONObject();
+
+        if (ctx.declarationSpecifiers()!=null)
+        {
+            System.out.println("washere dec");
+            Parameter.put("type",visitDeclarationSpecifiers(ctx.declarationSpecifiers()));
+        }
+
+        if (ctx.declarator()!=null)
+        {
+            System.out.println("washere dec");
+            Parameter.put("identifier",visitDeclarator(ctx.declarator()));
+        }
+        System.out.println("parameter");
+        System.out.println(Parameter);
+        return Parameter;
+    }
+
 
     @Override
     public JSONObject visitInitializer(InitializerContext ctx) {
@@ -138,7 +178,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
             primaryExpression.put("identifier", ctx.Identifier().getText());
         }else if (ctx.StringLiteral() != null) {
         }
-
+  
         return primaryExpression;
     }
 
