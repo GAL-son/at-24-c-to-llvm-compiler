@@ -10,11 +10,12 @@ import org.json.JSONObject;
 
 import com.at24.CBaseVisitor;
 import com.at24.CParser;
+import com.at24.CParser.CompilationUnitContext;
 import com.at24.CParser.DeclarationContext;
 import com.at24.CParser.FunctionDefinitionContext;
 import com.at24.codeBuilding.codeFeatures.CodeContext;
 import com.at24.codeBuilding.codeFeatures.Expression;
-import com.at24.codeBuilding.codeFeatures.Function;
+import com.at24.codeBuilding.codeFeatures.functions.Function;
 import com.at24.codeBuilding.codeFeatures.variables.Variable;
 import com.at24.codeBuilding.codeFeatures.variables.VariableTreeReader;
 import com.at24.exceptions.DoubleDeclarationException;
@@ -33,6 +34,8 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     public CodeBuilderVisitor() {
         code = "";
         vars = new HashMap<>();
+        funcs = new HashMap<>();
+        regs = new HashMap<>();
     }
 
     public CodeBuilderVisitor(CodeBuilderVisitor parent) {
@@ -57,6 +60,16 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
             return;
         }
         code += emit + "\n";
+    }
+
+    @Override
+    public void emitOnTop(String emit) {
+        if(!isGlobal()) {
+            parent.emitOnTop(emit);
+            return;
+        }
+        code = emit + "\n" + code;
+        
     }
 
     @Override
@@ -136,7 +149,28 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
         vars.put(var.identifier, var);
         var.parse(this);
-        var.readFomVariable(this);
+    }
+
+    @Override
+    public String visitCompilationUnit(CompilationUnitContext arg0) {
+        super.visitCompilationUnit(arg0);
+
+        for (var entry : funcs.entrySet()) {
+            Function f = entry.getValue();
+
+            if(!f.isDefined()) {
+                // Declare outside function
+                f.parse(this);
+            }
+        }
+
+        return code;
+    }
+
+    private void declareFunction(JSONObject functionDeclaration) {
+        System.out.println("functionDeclaration " + functionDeclaration);
+        Function func = new Function(functionDeclaration);
+        funcs.put(func.getIdentifier(), func);
     }
 
     public boolean variableExists(String var) {
@@ -168,10 +202,14 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
             try {
                 declareVariable(declaration);
             } catch (RuntimeException e) {
-                throw new RuntimeException(e.getMessage() + " At line: " + getLine(ctx));
+                throw new RuntimeException(e.getMessage() + " At line: " + getLine(ctx), e);
             }
         } else { // Check for function declaration
-            emit("FUNC");
+            try {
+                declareFunction(declaration);
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e.getMessage() + " At line: " + getLine(ctx), e);
+            }
         }
 
         return code;

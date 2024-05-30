@@ -84,11 +84,8 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
     public JSONObject visitDeclarator(DeclaratorContext ctx) {
         JSONObject declarator = new JSONObject();
 
-        JSONObject directDeclarator = visitDirectDeclarator(ctx.directDeclarator());
-        declarator.put("directDeclarator", directDeclarator);
+        return visitDirectDeclarator(ctx.directDeclarator());
 
-
-        return declarator;
     }
 
     @Override
@@ -104,13 +101,13 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         }
         else if (ctx.directDeclarator() != null)
         {
-            directDeclarator.put("DirectDeclarator", visitDirectDeclarator(ctx.directDeclarator()));
+            directDeclarator.put("directDeclarator", visitDirectDeclarator(ctx.directDeclarator()));
             if (ctx.identifierList() != null)
             {
                 directDeclarator.put("IdentifierList", visitIdentifierList(ctx.identifierList()));
             }
             else if (ctx.parameterTypeList()!=null){
-                directDeclarator.put("parameters", visitParameterTypeList(ctx.parameterTypeList()));
+                directDeclarator.put("parameters", visitParameterTypeList(ctx.parameterTypeList()).getJSONArray("parameters"));
             }
         }
 

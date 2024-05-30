@@ -7,11 +7,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class VariableTreeReader {
-     public static boolean isDeclarationVariable(JSONObject declaration) {
-        System.out.println(declaration);
-        Set<String> declaratorKeys = getDeclarator(declaration).keySet();
+    public static boolean isDeclarationVariable(JSONObject declaration) {
 
-        return declaratorKeys.size() == 1;
+        JSONObject declarator = getDeclarator(declaration);
+        System.out.println("isDeclarationVariable" + declarator);
+        return declarator.has("Identifier");
     }
 
     public static JSONObject getDeclarator(JSONObject declaration) {
@@ -30,7 +30,7 @@ public class VariableTreeReader {
     }
 
     public static String getVariableIdentifier(JSONObject declarator) {
-        return declarator.getJSONObject("directDeclarator").getString("Identifier");
+        return declarator.getString("Identifier");
     }
 
     public static JSONObject getInitializer(JSONObject declaration) {
