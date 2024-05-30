@@ -315,6 +315,80 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         System.out.println("end");
         return multiplicativeExpr;
     }
+
+    @Override
+    public JSONObject visitFunctionDefinition(FunctionDefinitionContext ctx){
+
+        JSONObject functionDefinition=new JSONObject();
+
+        if (ctx.declarationSpecifiers()!=null)
+        {
+            JSONObject declarationSpecifiers=new JSONObject();
+            declarationSpecifiers=visitDeclarationSpecifiers(ctx.declarationSpecifiers());
+            functionDefinition.put("functionDefinition",declarationSpecifiers);
+            System.out.println("fdef");
+        }
+        if (ctx.declarator()!=null){
+            JSONObject declarator=new JSONObject();
+            declarator=visitDeclarator(ctx.declarator());
+            functionDefinition.put("declarator",declarator);
+            System.out.println("fdec");
+        }
+        if (ctx.compoundStatement()!=null){
+            JSONObject compoundStatement=new JSONObject();
+            compoundStatement=visitCompoundStatement(ctx.compoundStatement());
+            functionDefinition.put("compoundStatement",compoundStatement);
+            System.out.println("fcst");
+        }
+
+        System.out.println(functionDefinition);
+    return functionDefinition;
+    }
+
+
+    @Override
+    public JSONObject visitCompoundStatement(CompoundStatementContext ctx){
+       JSONObject codeBlock = new JSONObject();
+
+        if (ctx.blockItemList()!=null)
+        {
+            codeBlock=visitBlockItemList(ctx.blockItemList());
+
+        }
+
+       return codeBlock;
+    }
+
+    @Override
+    public JSONObject visitBlockItemList(BlockItemListContext ctx){
+        JSONObject codeBlock = new JSONObject();
+        JSONArray codeItems= new JSONArray();
+
+        for (BlockItemContext bctx:ctx.blockItem()) {
+            JSONObject Bitem=visitBlockItem(bctx);
+            codeItems.put(Bitem);
+        }
+
+
+        return codeBlock.put("codeItems",codeItems);
+    }
+
+    @Override
+    public JSONObject visitJumpStatement(JumpStatementContext ctx){
+        JSONObject jumpStatement=new JSONObject();
+
+        // very unfinished
+
+        if(ctx.Return()!=null)
+        {
+            jumpStatement.put("jump",ctx.Return().getText());
+            if(ctx.expression()!=null){
+                jumpStatement.put("expression",visitExpression(ctx.expression()));
+            }
+        }
+
+        return jumpStatement;
+    }
 }
 
 
