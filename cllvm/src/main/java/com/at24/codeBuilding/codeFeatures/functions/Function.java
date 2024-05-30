@@ -30,10 +30,18 @@ public class Function implements Parsable {
     String identidier;
     List<ParamData> params = new LinkedList<>();
     boolean isDefined = false;
+    boolean useDefinition = false;
     
     
-    public Function(JSONObject declaration) {
-        setFromDeclaration(declaration);
+    public Function(JSONObject obj, boolean isDefinition) {
+        JSONObject funcData;
+        if(isDefinition) {
+            funcData = FunctionTreeReader.dataFromDefinition(obj);
+        } else {
+            funcData = FunctionTreeReader.getFunctionData(obj);
+        }
+
+        setData(funcData);
     }
 
     public String getIdentifier() {
@@ -44,8 +52,12 @@ public class Function implements Parsable {
         return isDefined;
     }
 
-    private void setFromDeclaration(JSONObject declaration) {
-        JSONObject funcData = FunctionTreeReader.getFunctionData(declaration);
+    public void define() {
+        isDefined = true;
+    }
+
+    private void setData(JSONObject funcData) {
+        System.out.println(" PARSED DATA" + funcData);
         this.identidier = funcData.getString("id");
         this.returnType = funcData.getString("returnType");
         JSONArray args = funcData.getJSONArray("parameters");
@@ -81,8 +93,30 @@ public class Function implements Parsable {
 
             declarationCode += ")";
             context.emitOnTop(declarationCode);
-        }
+        } else {
+            String declarationCode = String.join(" ",
+                "define",
+                CodeTranslator.typeConverter(returnType),
+                "@"+identidier,
+                "("
+            );
 
+            for (ParamData paramData : params) {
+                declarationCode = String.join(" ", 
+                    declarationCode,
+                    CodeTranslator.typeConverter(paramData.type),
+                    "%"+paramData.name,
+                    (params.indexOf(paramData) < params.size() - 1) ? "," : ""
+                );
+            }
+
+            declarationCode += ") {";
+            context.emit(declarationCode);
+        }
+    }
+
+    public void endDeclarationParse(CodeContext context)  {
+        context.emit("}");
     }
 
     public boolean hasParam(String param) {

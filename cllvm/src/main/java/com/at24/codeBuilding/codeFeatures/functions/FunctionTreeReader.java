@@ -6,9 +6,7 @@ import org.json.JSONObject;
 public class FunctionTreeReader {
     public static JSONObject getFunctionData(JSONObject declaration)  {
         JSONObject funcData = new JSONObject();
-
-        String returnType = declaration.getJSONObject("declarationSpecifiers").getString("typeSpecifier");
-        funcData.put("returnType", returnType);
+        funcData.put("returnType", getType(declaration));
         
         JSONObject directDeclarator = getDirectDeclarator(declaration);
 
@@ -16,6 +14,28 @@ public class FunctionTreeReader {
         funcData.put("parameters", directDeclarator.getJSONArray("parameters"));
 
         return funcData;
+    }
+
+    public static JSONObject dataFromDefinition(JSONObject definition) {
+        System.out.println("DEFINMITIO(N )" + definition);
+        JSONObject funcData = new JSONObject();
+        funcData.put("returnType", getType(definition));
+
+        JSONObject declarator = definition.getJSONObject("declarator");
+
+        funcData.put("id", declarator.getJSONObject("directDeclarator").getString("Identifier"));
+        JSONArray params = new JSONArray();
+        if(declarator.has("parameters")) {
+            params = cleanArgs(declarator.getJSONArray("parameters"));
+        }
+        funcData.put("parameters", params);
+
+        return funcData;
+    }
+
+    public static String getType(JSONObject declaration) {
+        return declaration.getJSONObject("declarationSpecifiers").getString("typeSpecifier");
+        
     }
 
     public static JSONObject getDirectDeclarator(JSONObject declaration) {

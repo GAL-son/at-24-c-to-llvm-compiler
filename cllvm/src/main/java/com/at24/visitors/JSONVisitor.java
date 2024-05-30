@@ -322,7 +322,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         {
             JSONObject declarationSpecifiers=new JSONObject();
             declarationSpecifiers=visitDeclarationSpecifiers(ctx.declarationSpecifiers());
-            functionDefinition.put("functionDefinition",declarationSpecifiers);
+            functionDefinition.put("declarationSpecifiers",declarationSpecifiers);
             System.out.println("fdef");
         }
         if (ctx.declarator()!=null){
@@ -339,7 +339,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         }
 
         System.out.println(functionDefinition);
-    return functionDefinition;
+        return functionDefinition;
     }
 
 

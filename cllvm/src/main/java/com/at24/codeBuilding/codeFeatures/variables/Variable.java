@@ -68,19 +68,19 @@ public class Variable implements Parsable {
         if(isGlobal) {
             context.emit(parseGlobal());
         } else {
-            context.emit(parseLocal(context));
+            parseLocal(context);
         }        
     }
 
-    public String parseLocal(CodeContext context) {
+    public void parseLocal(CodeContext context) {
         String variableCode = "";
         variableCode += "%" + identifier + " = alloca " + CodeTranslator.typeConverter(type);
+
+        context.emit(variableCode);
 
         if(initializator != null) {
             storeToVariable(context, initializator);
         }       
-
-        return variableCode;
     }
 
     public void storeToVariable(CodeContext context, Expression expr) {
@@ -94,7 +94,7 @@ public class Variable implements Parsable {
             assignType,
             ((expr.isExpression()) ? exprReg : expr.getValue()) + ",",
             (varType+"*"),
-            identifier
+            "%"+identifier
         );
 
         context.emit(storeCode);        

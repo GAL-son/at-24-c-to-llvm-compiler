@@ -169,7 +169,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
     private void declareFunction(JSONObject functionDeclaration) {
         System.out.println("functionDeclaration " + functionDeclaration);
-        Function func = new Function(functionDeclaration);
+        Function func = new Function(functionDeclaration, false);
         funcs.put(func.getIdentifier(), func);
     }
 
@@ -215,14 +215,35 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         return code;
     }
 
-    // @Override
-    // public String visitFunctionDefinition(FunctionDefinitionContext ctx) {
-    //     JSONVisitor visitor = new JSONVisitor();
-    //     JSONObject declarationSpecifiers = visitor.visitDeclarationSpecifiers(ctx.declarationSpecifiers());
-    //     JSONObject declarator = visitor.visitDeclarator(ctx.declarator());
+    @Override
+    public String visitFunctionDefinition(FunctionDefinitionContext ctx) {
+        JSONVisitor visitor = new JSONVisitor();
+        JSONObject funcData = new JSONObject();
+        funcData.put(
+            "declarationSpecifiers",
+            visitor.visitDeclarationSpecifiers(ctx.declarationSpecifiers())
+        );
+        funcData.put(
+            "declarator",
+            visitor.visitDeclarator(ctx.declarator())
+        );
 
-    //     return code;
-    // }
+        Function func = new Function(funcData, true);
+        funcs.put(func.getIdentifier(), func);
+        func.define();
+        func.parse(this);
+                
+        CodeBuilderVisitor newContext = new CodeBuilderVisitor(this, func);
+
+        newContext.visitCompoundStatement(ctx.compoundStatement());
+
+        func.endDeclarationParse(newContext);
+
+
+
+
+        return code;
+    }
 
     
 
