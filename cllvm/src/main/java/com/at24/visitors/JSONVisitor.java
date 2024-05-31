@@ -46,7 +46,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
             declarationData.put("initDeclaratorList", initDeclaratorList.getJSONArray("initDeclaratorList"));
         }
 
-        System.out.println(declarationData);
+        // // System.out.println(declarationData);
 
         return declarationData;
     }
@@ -138,17 +138,17 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
         if (ctx.declarationSpecifiers()!=null)
         {
-            System.out.println("washere dec");
+            // System.out.println("washere dec");
             Parameter.put("type",visitDeclarationSpecifiers(ctx.declarationSpecifiers()));
         }
 
         if (ctx.declarator()!=null)
         {
-            System.out.println("washere dec");
+            // System.out.println("washere dec");
             Parameter.put("identifier",visitDeclarator(ctx.declarator()));
         }
-        System.out.println("parameter");
-        System.out.println(Parameter);
+        // System.out.println("parameter");
+        // System.out.println(Parameter);
         return Parameter;
     }
 
@@ -190,15 +190,15 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
     @Override
     public JSONObject visitDeclarationSpecifiers(DeclarationSpecifiersContext ctx) {
         JSONObject declarationSpecifiers = new JSONObject();
-        System.out.println("START: " + declarationSpecifiers.toString());
+        // System.out.println("START: " + declarationSpecifiers.toString());
         for (DeclarationSpecifierContext declarationCtx : ctx.declarationSpecifier()) {
-            System.out.println("ITER===============");
+            // System.out.println("ITER===============");
             Set<String> keySet = new HashSet<>(declarationSpecifiers.keySet());
 
 
             JSONObject result = visitDeclarationSpecifier(declarationCtx);
             Set<String> resultKeySet = result.keySet();
-            System.out.println("test final: " + declarationSpecifiers.toString());
+            // System.out.println("test final: " + declarationSpecifiers.toString());
             keySet.retainAll(resultKeySet);
 
             if (!keySet.isEmpty()) {
@@ -206,14 +206,14 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
             }
 
             for (String key : resultKeySet) {
-                System.out.println("PUT " + key + ":" + result.get(key));
-                System.out.println("before put: " + declarationSpecifiers.toString());
+                // System.out.println("PUT " + key + ":" + result.get(key));
+                // System.out.println("before put: " + declarationSpecifiers.toString());
                 declarationSpecifiers.put(key, result.get(key));
-                System.out.println("after put: " + declarationSpecifiers.toString());
+                // System.out.println("after put: " + declarationSpecifiers.toString());
             }
         }
 
-        System.out.println("final: " + declarationSpecifiers.toString());
+        // System.out.println("final: " + declarationSpecifiers.toString());
         return declarationSpecifiers;
     }
 
@@ -268,7 +268,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
 
         if (!operators.isEmpty()) {
-            System.out.println("not empty");
+            // System.out.println("not empty");
             additiveExpr.put("expressions", expressions);
             additiveExpr.put("operators", operators);
         }
@@ -309,7 +309,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         else {
             multiplicativeExpr=(Support);
         }
-        System.out.println("end");
+        // System.out.println("end");
         return multiplicativeExpr;
     }
 
@@ -323,22 +323,22 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
             JSONObject declarationSpecifiers=new JSONObject();
             declarationSpecifiers=visitDeclarationSpecifiers(ctx.declarationSpecifiers());
             functionDefinition.put("declarationSpecifiers",declarationSpecifiers);
-            System.out.println("fdef");
+            // System.out.println("fdef");
         }
         if (ctx.declarator()!=null){
             JSONObject declarator=new JSONObject();
             declarator=visitDeclarator(ctx.declarator());
             functionDefinition.put("declarator",declarator);
-            System.out.println("fdec");
+            // System.out.println("fdec");
         }
         if (ctx.compoundStatement()!=null){
             JSONObject compoundStatement=new JSONObject();
             compoundStatement=visitCompoundStatement(ctx.compoundStatement());
             functionDefinition.put("compoundStatement",compoundStatement);
-            System.out.println("fcst");
+            // System.out.println("fcst");
         }
 
-        System.out.println(functionDefinition);
+        // System.out.println(functionDefinition);
         return functionDefinition;
     }
 

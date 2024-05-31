@@ -10,7 +10,7 @@ public class VariableTreeReader {
     public static boolean isDeclarationVariable(JSONObject declaration) {
 
         JSONObject declarator = getDeclarator(declaration);
-        System.out.println("isDeclarationVariable" + declarator);
+        // System.out.println("isDeclarationVariable" + declarator);
         return declarator.has("Identifier");
     }
 

@@ -17,7 +17,7 @@ public class FunctionTreeReader {
     }
 
     public static JSONObject dataFromDefinition(JSONObject definition) {
-        System.out.println("DEFINMITIO(N )" + definition);
+        // System.out.println("DEFINMITIO(N )" + definition);
         JSONObject funcData = new JSONObject();
         funcData.put("returnType", getType(definition));
 

@@ -12,5 +12,6 @@ public interface CodeContext {
     public String getRegisterName(Expression expression);
     public String borrowRegister();
     public String assignRegister(Expression expression);
+    public boolean isVariableFunctionArg(String varName);
     
 } 

@@ -13,6 +13,8 @@ import com.at24.CParser;
 import com.at24.CParser.CompilationUnitContext;
 import com.at24.CParser.DeclarationContext;
 import com.at24.CParser.FunctionDefinitionContext;
+import com.at24.CParser.JumpStatementContext;
+import com.at24.CParser.PostfixExpressionContext;
 import com.at24.codeBuilding.codeFeatures.CodeContext;
 import com.at24.codeBuilding.codeFeatures.Expression;
 import com.at24.codeBuilding.codeFeatures.functions.Function;
@@ -56,7 +58,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     @Override
     public void emit(String emit) {
         if(!isGlobal()) {
-            parent.emit(emit);
+            parent.emit("\t"+emit);
             return;
         }
         code += emit + "\n";
@@ -75,7 +77,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     @Override
     public Variable searchVariable(String variableName) {
         if(currentFunction.hasParam(variableName)) {
-            return null;
+            return currentFunction.getParamVariable(variableName);
         }
 
         // Search variable in current context
@@ -168,7 +170,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     }
 
     private void declareFunction(JSONObject functionDeclaration) {
-        System.out.println("functionDeclaration " + functionDeclaration);
+        // System.out.println("functionDeclaration " + functionDeclaration);
         Function func = new Function(functionDeclaration, false);
         funcs.put(func.getIdentifier(), func);
     }
@@ -189,13 +191,26 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         return true;
     }
 
+    private void handleReturn(JSONObject jumpStatement) {
+        if(currentFunction == null) {
+            throw new RuntimeException("Return statement outside function body");
+        }
+
+        System.out.println("DO RETURN STUFF");
+        currentFunction.buildReturn(this, jumpStatement.getJSONObject("expression"));
+    }
+
     private int getLine(ParserRuleContext ctx) {
         return ctx.getStart().getLine();
     }
 
+    public boolean isVariableFunctionArg(String varName) {
+        return currentFunction.hasParam(varName);
+    }
+
     @Override
     public String visitDeclaration(DeclarationContext ctx) {
-        System.out.println("CODE BUILDER + " + ctx.getText());
+        // System.out.println("CODE BUILDER + " + ctx.getText());
         JSONObject declaration = new JSONVisitor().visitDeclaration(ctx);
         if (VariableTreeReader.isDeclarationVariable(declaration)) {
             // Do variable declaration
@@ -238,12 +253,26 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         newContext.visitCompoundStatement(ctx.compoundStatement());
 
         func.endDeclarationParse(newContext);
-
-
-
-
         return code;
     }
+
+    @Override
+    public String visitJumpStatement(JumpStatementContext ctx) {
+        JSONVisitor visitor = new JSONVisitor();
+        JSONObject jumpStatement = visitor.visitJumpStatement(ctx);
+
+        String jump = jumpStatement.getString("jump");
+
+        if(jump.equals("return")) {
+            // Do return stuff
+            System.out.println("RETURN!!!!!!!!!!!!!!!!!!!!!!!!");
+            handleReturn(jumpStatement);
+        }
+
+        // System.out.println("RETURN" + jumpStatement);;
+        return super.visitJumpStatement(ctx);
+    }
+
 
     
 

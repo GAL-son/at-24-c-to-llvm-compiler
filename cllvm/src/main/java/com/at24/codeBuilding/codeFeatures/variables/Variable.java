@@ -86,6 +86,8 @@ public class Variable implements Parsable {
     public void storeToVariable(CodeContext context, Expression expr) {
         String varType = CodeTranslator.typeConverter(type);
         String assignType = expr.getType();
+
+        expr.parse(context);
         
         String exprReg = "%" + context.getRegisterName(expr);
 

@@ -22,7 +22,8 @@ public class CodeTranslator {
         switch (operation) {
             case "+":
                 return "add";
-
+            case "*":
+                return "mul";
         
             default:
                 return "";

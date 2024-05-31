@@ -13,7 +13,9 @@ import org.json.JSONObject;
 
 import com.at24.codeBuilding.CodeTranslator;
 import com.at24.codeBuilding.codeFeatures.CodeContext;
+import com.at24.codeBuilding.codeFeatures.Expression;
 import com.at24.codeBuilding.codeFeatures.Parsable;
+import com.at24.codeBuilding.codeFeatures.variables.Variable;
 
 public class Function implements Parsable {
     private class ParamData {
@@ -23,6 +25,17 @@ public class Function implements Parsable {
         ParamData(String name, String type) {
             this.type = type;
             this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return String.join("", 
+                "<",
+                type,
+                ",",
+                name,
+                ">"
+            );
         }
     }
 
@@ -56,8 +69,40 @@ public class Function implements Parsable {
         isDefined = true;
     }
 
+    public void buildReturn(CodeContext context, JSONObject returnExpr) {
+        Expression retExpr = new Expression(returnExpr);
+        String retVal = "";
+        boolean isConst = false;
+        if(retExpr.isExpression()) {
+            // Do the expression thing
+            
+            retExpr.parse(context);
+            retVal = context.getRegisterName(retExpr);
+
+        } else if (retExpr.isConst()) {
+            // Set string 
+            retVal = retExpr.getValue();
+            isConst = true;
+        } else {
+            // Is variable
+            String varName = retExpr.getVariable();
+            Variable var = context.searchVariable(varName);
+
+            String regName = var.readFomVariable(context);
+            retVal = regName;
+        }
+
+        String returnStatemet = String.join(" ", 
+            "ret",
+            CodeTranslator.typeConverter(returnType),
+            ((isConst) ? "" : "%")+retVal
+        );
+
+        context.emit(returnStatemet);
+    }
+
     private void setData(JSONObject funcData) {
-        System.out.println(" PARSED DATA" + funcData);
+        // System.out.println(" PARSED DATA" + funcData);
         this.identidier = funcData.getString("id");
         this.returnType = funcData.getString("returnType");
         JSONArray args = funcData.getJSONArray("parameters");
@@ -119,6 +164,23 @@ public class Function implements Parsable {
         context.emit("}");
     }
 
+    public Variable getParamVariable(String varName) {
+        if(!hasParam(varName)) {
+            return null;
+        } 
+        ParamData param = getParam(varName);
+        if(param == null) {
+            return null;
+        }
+
+        Variable var = new Variable();
+        var.type = param.type;
+        var.identifier = param.name;
+        var.isGlobal = false;       
+
+        return var;
+    }
+
     public boolean hasParam(String param) {
         for (ParamData paramData : params) {
             if(paramData.name.equals(param)) {
@@ -127,6 +189,16 @@ public class Function implements Parsable {
         }
 
         return false;
+    }
+
+    private ParamData getParam(String paramName) {
+        for (ParamData paramData : params) {
+            if(paramData.name.equals(paramName)) {
+                return paramData;
+            }
+        }
+
+        return null;
     }
     
 }
