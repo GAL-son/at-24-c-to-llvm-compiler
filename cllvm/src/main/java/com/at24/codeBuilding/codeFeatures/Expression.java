@@ -1,6 +1,7 @@
 package com.at24.codeBuilding.codeFeatures;
 
 import java.nio.charset.CoderMalfunctionError;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,17 +15,35 @@ import org.json.JSONObject;
 import com.at24.CParser.ForExpressionContext;
 import com.at24.codeBuilding.CodeBuilderVisitor;
 import com.at24.codeBuilding.CodeTranslator;
+import com.at24.codeBuilding.codeFeatures.functions.Function;
 import com.at24.codeBuilding.codeFeatures.variables.Variable;
+import com.at24.exceptions.SyntaxException;
 
 public class Expression implements Parsable{
     public boolean isVariable = false;
     String value = null;
     String varName = null;
+    String functionCall = null;
+    List<Expression> args = null;
     List<String> operators = new LinkedList<>();
     List<Expression> expressions = new LinkedList<>();
 
     public Expression(JSONObject initializer) {
         System.out.println("EXPR" + initializer);
+        // Check function
+        if(initializer.has("arguments")) {
+            System.out.println("CHECK FUNC");
+            this.functionCall = initializer.getString("name");
+            args = new LinkedList<>();
+            JSONArray array = initializer.getJSONArray("arguments");
+            for(int i = 0; i < array.length(); i++) {
+                JSONObject data = array.getJSONObject(i);
+                args.add(new Expression(data));
+            }
+            System.out.println(this);
+            return;
+        }
+
         // Check direct constant
         if(initializer.has("Constant")) {
             this.value = initializer.getString("Constant");
@@ -131,10 +150,21 @@ public class Expression implements Parsable{
     private String getExprIdentifier(CodeContext context) {
         System.out.println("GET REG EXPR + " + this);
         String ret = "";
-        if(isConst()) {
+        if(isFunctionCall()) {
+            Function funcCall = context.searchFunction(functionCall);
+            if (funcCall == null) {
+                throw new SyntaxException("Missing function declaration: " + functionCall);
+            }
+
+            List<String> argsStrings = new ArrayList<>(args.size());
+
+            for (Expression arg : args) {
+                argsStrings.add(arg.getExprIdentifier(context));
+            }
+            ret = "%" + funcCall.callFunctionWithRegister(context, argsStrings);
+        } else if(isConst()) {
             ret = getValue();
         } else if (isExpression()) {
-            System.out.println("Is Const");
             ret = "%" + context.getRegisterName(this);
         } else {
             if(context.isVariableFunctionArg(varName)) {
@@ -142,19 +172,17 @@ public class Expression implements Parsable{
             } else {
                 Variable var = context.searchVariable(varName);
                 ret = "%"+var.readFomVariable(context);
-            }
-
-
-            
+            }           
         }
         System.out.println("EXPR IDENTIFER " + ret);
         return ret;
     }
 
+    public boolean isFunctionCall() {
+        return functionCall != null;
+    }
+
     public boolean isConst() {
-        System.out.println("\nCHECK CONST");
-        System.out.println(this);
-        System.out.println("value != null ");
         System.out.println((value != null));
         if(value != null) {
             System.out.println("!value.isEmpty()" + !value.isEmpty());
@@ -230,6 +258,10 @@ public class Expression implements Parsable{
         String ret = "[EXPR: \n";
         ret += "Value: " + value + "\n";
         ret += "Variable: " + varName + "\n";
+        ret += "Func call" + functionCall + "\n";
+        if(functionCall != null) {
+            ret += "funcArgs " + args.size() + "\n";
+        }
         ret += "operators: " + operators.toString() + "\n";
         ret += "expressions: " + expressions.size() + "\n";
         return ret + "]";

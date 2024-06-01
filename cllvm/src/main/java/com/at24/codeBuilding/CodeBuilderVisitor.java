@@ -58,7 +58,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     @Override
     public void emit(String emit) {
         if(!isGlobal()) {
-            parent.emit("\t"+emit);
+            parent.emit("   "+emit);
             return;
         }
         code += emit + "\n";
@@ -268,6 +268,13 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
             handleReturn(jumpStatement);
         }
         return super.visitJumpStatement(ctx);
+    }
+
+    @Override
+    public String visitPostfixExpression(PostfixExpressionContext arg0) {
+        // Do function call Stuff;
+        // TODO Auto-generated method stub
+        return super.visitPostfixExpression(arg0);
     }
 
 
