@@ -9,7 +9,7 @@ import com.at24.visitors.JSONVisitor;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "int x = 2; int func(int x); int main(int x) {int z = func(x); return x + 1 * 2}";
+        String code = "int a=func(a,b,3);";
 
         CharStream stream = CharStreams.fromString(code);
 

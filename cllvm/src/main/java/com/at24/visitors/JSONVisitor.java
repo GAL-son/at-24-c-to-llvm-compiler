@@ -94,58 +94,50 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
         if (ctx.Identifier() != null) {
             directDeclarator.put("Identifier", ctx.Identifier().getText());
-        }
-        else if (ctx.declarator() != null)
-        {
+        } else if (ctx.declarator() != null) {
             directDeclarator.put("Declarator", visitDeclarator(ctx.declarator()));
-        }
-        else if (ctx.directDeclarator() != null)
-        {
+        } else if (ctx.directDeclarator() != null) {
             directDeclarator.put("directDeclarator", visitDirectDeclarator(ctx.directDeclarator()));
-            if (ctx.identifierList() != null)
-            {
+            if (ctx.identifierList() != null) {
                 directDeclarator.put("IdentifierList", visitIdentifierList(ctx.identifierList()));
-            }
-            else if (ctx.parameterTypeList()!=null){
+            } else if (ctx.parameterTypeList() != null) {
                 directDeclarator.put("parameters", visitParameterTypeList(ctx.parameterTypeList()).getJSONArray("parameters"));
             }
         }
 
 
-
         return directDeclarator;
     }
+
     //check later
     @Override
-    public JSONObject visitParameterList(ParameterListContext ctx){
+    public JSONObject visitParameterList(ParameterListContext ctx) {
 
-        JSONObject parameterList=new JSONObject();
-        JSONArray parameters=new JSONArray();
-        for(ParameterDeclarationContext pctx:ctx.parameterDeclaration()){
-            JSONObject parameter=visitParameterDeclaration(pctx);
+        JSONObject parameterList = new JSONObject();
+        JSONArray parameters = new JSONArray();
+        for (ParameterDeclarationContext pctx : ctx.parameterDeclaration()) {
+            JSONObject parameter = visitParameterDeclaration(pctx);
             parameters.put(parameter);
         }
-      parameterList.put("parameters",parameters);
+        parameterList.put("parameters", parameters);
 
 
         return parameterList;
     }
 
     @Override
-    public JSONObject visitParameterDeclaration(ParameterDeclarationContext ctx){
+    public JSONObject visitParameterDeclaration(ParameterDeclarationContext ctx) {
 
-        JSONObject Parameter=new JSONObject();
+        JSONObject Parameter = new JSONObject();
 
-        if (ctx.declarationSpecifiers()!=null)
-        {
+        if (ctx.declarationSpecifiers() != null) {
             // System.out.println("washere dec");
-            Parameter.put("type",visitDeclarationSpecifiers(ctx.declarationSpecifiers()));
+            Parameter.put("type", visitDeclarationSpecifiers(ctx.declarationSpecifiers()));
         }
 
-        if (ctx.declarator()!=null)
-        {
+        if (ctx.declarator() != null) {
             // System.out.println("washere dec");
-            Parameter.put("identifier",visitDeclarator(ctx.declarator()));
+            Parameter.put("identifier", visitDeclarator(ctx.declarator()));
         }
         // System.out.println("parameter");
         // System.out.println(Parameter);
@@ -171,11 +163,11 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
         if (ctx.Constant() != null) {
             primaryExpression.put("Constant", ctx.Constant().getText());
-        }  else if (ctx.Identifier() != null) {
+        } else if (ctx.Identifier() != null) {
             primaryExpression.put("identifier", ctx.Identifier().getText());
-        }else if (ctx.StringLiteral() != null) {
+        } else if (ctx.StringLiteral() != null) {
         }
-  
+
         return primaryExpression;
     }
 
@@ -249,19 +241,19 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         JSONObject additiveExpr = new JSONObject();
         JSONArray expressions = new JSONArray();
         JSONArray operators = new JSONArray();
-        JSONObject Support= new JSONObject();
+        JSONObject Support = new JSONObject();
         boolean flag = false;
 
         for (MultiplicativeExpressionContext multiCtx : ctx.multiplicativeExpression()) {
             JSONObject multiplicative = visitMultiplicativeExpression(multiCtx);
             expressions.put(multiplicative);
-            Support=multiplicative;
+            Support = multiplicative;
         }
 
         for (ParseTree child : ctx.children) {
             if (child.getText().equals("+") || child.getText().equals("-")) {
                 operators.put(child.getText());
-                flag=true;
+                flag = true;
 
             }
         }
@@ -271,9 +263,8 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
             // System.out.println("not empty");
             additiveExpr.put("expressions", expressions);
             additiveExpr.put("operators", operators);
-        }
-        else{
-            additiveExpr=Support;
+        } else {
+            additiveExpr = Support;
         }
         return additiveExpr;
     }
@@ -283,58 +274,55 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         JSONObject multiplicativeExpr = new JSONObject();
         JSONArray expressions = new JSONArray();
         JSONArray operators = new JSONArray();
-        JSONObject Support= new JSONObject();
+        JSONObject Support = new JSONObject();
         boolean flag = false;
 
         for (CastExpressionContext castCtx : ctx.castExpression()) {
             JSONObject cast = visitCastExpression(castCtx);
             expressions.put(cast);
-            Support=cast;
+            Support = cast;
         }
 
         for (ParseTree child : ctx.children) {
             String text = child.getText();
             if (text.equals("*") || text.equals("/") || text.equals("%")) {
                 operators.put(text);
-                flag=true;
+                flag = true;
             }
         }
-
 
 
         if (!operators.isEmpty()) {
             multiplicativeExpr.put("expressions", expressions);
             multiplicativeExpr.put("operators", operators);
-        }
-        else {
-            multiplicativeExpr=(Support);
+        } else {
+            multiplicativeExpr = (Support);
         }
         // System.out.println("end");
         return multiplicativeExpr;
     }
 
     @Override
-    public JSONObject visitFunctionDefinition(FunctionDefinitionContext ctx){
+    public JSONObject visitFunctionDefinition(FunctionDefinitionContext ctx) {
 
-        JSONObject functionDefinition=new JSONObject();
+        JSONObject functionDefinition = new JSONObject();
 
-        if (ctx.declarationSpecifiers()!=null)
-        {
-            JSONObject declarationSpecifiers=new JSONObject();
-            declarationSpecifiers=visitDeclarationSpecifiers(ctx.declarationSpecifiers());
-            functionDefinition.put("declarationSpecifiers",declarationSpecifiers);
+        if (ctx.declarationSpecifiers() != null) {
+            JSONObject declarationSpecifiers = new JSONObject();
+            declarationSpecifiers = visitDeclarationSpecifiers(ctx.declarationSpecifiers());
+            functionDefinition.put("declarationSpecifiers", declarationSpecifiers);
             // System.out.println("fdef");
         }
-        if (ctx.declarator()!=null){
-            JSONObject declarator=new JSONObject();
-            declarator=visitDeclarator(ctx.declarator());
-            functionDefinition.put("declarator",declarator);
+        if (ctx.declarator() != null) {
+            JSONObject declarator = new JSONObject();
+            declarator = visitDeclarator(ctx.declarator());
+            functionDefinition.put("declarator", declarator);
             // System.out.println("fdec");
         }
-        if (ctx.compoundStatement()!=null){
-            JSONObject compoundStatement=new JSONObject();
-            compoundStatement=visitCompoundStatement(ctx.compoundStatement());
-            functionDefinition.put("compoundStatement",compoundStatement);
+        if (ctx.compoundStatement() != null) {
+            JSONObject compoundStatement = new JSONObject();
+            compoundStatement = visitCompoundStatement(ctx.compoundStatement());
+            functionDefinition.put("compoundStatement", compoundStatement);
             // System.out.println("fcst");
         }
 
@@ -344,47 +332,80 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
 
     @Override
-    public JSONObject visitCompoundStatement(CompoundStatementContext ctx){
-       JSONObject codeBlock = new JSONObject();
+    public JSONObject visitCompoundStatement(CompoundStatementContext ctx) {
+        JSONObject codeBlock = new JSONObject();
 
-        if (ctx.blockItemList()!=null)
-        {
-            codeBlock=visitBlockItemList(ctx.blockItemList());
+        if (ctx.blockItemList() != null) {
+            codeBlock = visitBlockItemList(ctx.blockItemList());
 
         }
 
-       return codeBlock;
+        return codeBlock;
     }
 
     @Override
-    public JSONObject visitBlockItemList(BlockItemListContext ctx){
+    public JSONObject visitBlockItemList(BlockItemListContext ctx) {
         JSONObject codeBlock = new JSONObject();
-        JSONArray codeItems= new JSONArray();
+        JSONArray codeItems = new JSONArray();
 
-        for (BlockItemContext bctx:ctx.blockItem()) {
-            JSONObject Bitem=visitBlockItem(bctx);
+        for (BlockItemContext bctx : ctx.blockItem()) {
+            JSONObject Bitem = visitBlockItem(bctx);
             codeItems.put(Bitem);
         }
 
 
-        return codeBlock.put("codeItems",codeItems);
+        return codeBlock.put("codeItems", codeItems);
     }
 
     @Override
-    public JSONObject visitJumpStatement(JumpStatementContext ctx){
-        JSONObject jumpStatement=new JSONObject();
+    public JSONObject visitJumpStatement(JumpStatementContext ctx) {
+        JSONObject jumpStatement = new JSONObject();
 
         // very unfinished
 
-        if(ctx.Return()!=null)
-        {
-            jumpStatement.put("jump",ctx.Return().getText());
-            if(ctx.expression()!=null){
-                jumpStatement.put("expression",visitExpression(ctx.expression()));
+        if (ctx.Return() != null) {
+            jumpStatement.put("jump", ctx.Return().getText());
+            if (ctx.expression() != null) {
+                jumpStatement.put("expression", visitExpression(ctx.expression()));
             }
         }
 
         return jumpStatement;
+    }
+
+    @Override
+    public JSONObject visitPostfixExpression(PostfixExpressionContext ctx) {
+        JSONObject funcCall = new JSONObject();
+
+        if (ctx.primaryExpression() != null) {
+            //System.out.println(ctx.argumentExpressionList());
+            if (ctx.argumentExpressionList().size()!=0) {
+                funcCall.put("name", visitPrimaryExpression(ctx.primaryExpression()).get("identifier"));
+                for (ArgumentExpressionListContext actx : ctx.argumentExpressionList()) {
+                    funcCall.put("arguments", visitArgumentExpressionList(actx).get("arguments"));
+                }
+            }else {
+                return visitPrimaryExpression(ctx.primaryExpression());
+            }
+
+
+        }
+
+
+        return funcCall;
+    }
+
+    @Override
+    public JSONObject visitArgumentExpressionList(ArgumentExpressionListContext ctx) {
+        JSONObject argument = new JSONObject();
+        JSONArray arguments = new JSONArray();
+
+        for (AssignmentExpressionContext actx : ctx.assignmentExpression()) {
+            arguments.put(visitAssignmentExpression(actx));
+        }
+
+        argument.put("arguments", arguments);
+        return argument;
     }
 }
 
