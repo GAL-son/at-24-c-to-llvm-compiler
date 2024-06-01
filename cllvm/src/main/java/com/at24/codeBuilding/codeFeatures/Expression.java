@@ -126,55 +126,6 @@ public class Expression implements Parsable{
             //System.out.println(operationCode);
             lastReg = saveToRegister(context, operationCode);            
         }
-
-        
-        // for (Expression expression : expressions) {
-        //     //System.out.println("NESTED EXPRESION" + expression.toString());
-        //     if(expression.isExpression()) {
-        //         expression.parse(context);
-        //     } 
-        // }       
-        // System.out.println("EXPRESION");
-
-        // String lastReg = null;
-        // int currentOperationIndex = 0;
-
-        // for (String operator : operators) {
-        //     String operation = CodeTranslator.operationConverter(operator);
-        //     String operationCode = "";
-        //     Expression first;
-        //     String regFirst;
-            
-        //     if(lastReg == null) {
-        //         System.out.println("CURRENT Index" + currentOperationIndex); 
-        //         first = expressions.get(currentOperationIndex++);
-        //         regFirst = first.getExprIdentifier(context);
-        //     }  else {
-        //         regFirst = lastReg;
-        //     }
-            
-            
-        //     Expression second = expressions.get(currentOperationIndex++);
-        //     String regSecond = second.getExprIdentifier(context);          
-            
-        //     System.out.println("CURRENT OPERATION"); 
-        //     System.out.println(operation); 
-        //     System.out.println("FirtstArg - " + regFirst); 
-        //     System.out.println("SecondArg - " + regSecond); 
-
-            
-
-        //     operationCode = String.join(" ", 
-        //         operation, 
-        //         getType(),
-        //         "%" + regFirst + ",",
-        //         "%" + regSecond
-        //     );
-
-        //     lastReg = saveToRegister(context, operationCode);
-        // }
-        
-        // context.assignRegister(this);
     }
 
     private String getExprIdentifier(CodeContext context) {

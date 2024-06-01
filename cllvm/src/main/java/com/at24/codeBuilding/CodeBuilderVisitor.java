@@ -265,11 +265,8 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
         if(jump.equals("return")) {
             // Do return stuff
-            System.out.println("RETURN!!!!!!!!!!!!!!!!!!!!!!!!");
             handleReturn(jumpStatement);
         }
-
-        // System.out.println("RETURN" + jumpStatement);;
         return super.visitJumpStatement(ctx);
     }
 
