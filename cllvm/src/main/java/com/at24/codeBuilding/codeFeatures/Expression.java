@@ -1,5 +1,6 @@
 package com.at24.codeBuilding.codeFeatures;
 
+import java.nio.charset.CoderMalfunctionError;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.at24.CParser.ForExpressionContext;
+import com.at24.codeBuilding.CodeBuilderVisitor;
 import com.at24.codeBuilding.CodeTranslator;
 import com.at24.codeBuilding.codeFeatures.variables.Variable;
 
@@ -116,7 +118,7 @@ public class Expression implements Parsable{
             
             String operationCode = String.join(" ", 
                     operation, 
-                    getType(),
+                    CodeTranslator.typeConverter(getType(context)),
                     regFirst + ",",
                     regSecond
                 );
@@ -209,9 +211,38 @@ public class Expression implements Parsable{
         return value != null && (!value.isEmpty());
     }
 
-    public String getType() {
-        return "EXPRTYPE";
+    public String getType(CodeContext context) {
+        String type = "";
+        if(isConst()) {
+            // Check values
+            if(value.contains("\'")) {
+                return "char";
+            } else {
+                return "int";
+            }
+        } else if(isVariable()) {
+            Variable var = context.searchVariable(varName);
+
+            if(var != null) {
+                type = var.type;
+            }
+        } else {
+            String exprType = "";
+            for (Expression expression : expressions) {
+                String subExprType = expression.getType(context);
+                if(!CodeTranslator.compareTypes(exprType, subExprType)) {
+                    exprType = subExprType;
+                }
+            }
+            type = exprType;
+        }
+
+        return type;
     }    
+
+    public boolean isVariable() {
+        return varName != null;
+    }
 
     public String getVariable() {
         return varName;
