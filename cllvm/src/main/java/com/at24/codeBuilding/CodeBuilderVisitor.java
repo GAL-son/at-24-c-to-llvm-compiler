@@ -272,6 +272,23 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         // System.out.println("RETURN" + jumpStatement);;
         return super.visitJumpStatement(ctx);
     }
+    @Override
+    public String visitPostfixExpression(PostfixExpressionContext ctx){
+
+        JSONVisitor visitor = new JSONVisitor();
+
+        JSONObject postfixExpression = visitor.visitPostfixExpression(ctx);
+        return super.visitPostfixExpression(ctx);
+    }
+    @Override
+    public String visitEqualityExpression(CParser.EqualityExpressionContext ctx){
+
+        JSONVisitor visitor = new JSONVisitor();
+
+        JSONObject equalityExpression = visitor.visitEqualityExpression(ctx);
+        return super.visitEqualityExpression(ctx);
+    }
+
 
 
     

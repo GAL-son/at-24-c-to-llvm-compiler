@@ -377,13 +377,15 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
     public JSONObject visitPostfixExpression(PostfixExpressionContext ctx) {
         JSONObject funcCall = new JSONObject();
 
+
         if (ctx.primaryExpression() != null) {
-            //System.out.println(ctx.argumentExpressionList());
+
             if (ctx.argumentExpressionList().size()!=0) {
                 funcCall.put("name", visitPrimaryExpression(ctx.primaryExpression()).get("identifier"));
                 for (ArgumentExpressionListContext actx : ctx.argumentExpressionList()) {
                     funcCall.put("arguments", visitArgumentExpressionList(actx).get("arguments"));
                 }
+                System.out.println(funcCall);
             }else {
                 return visitPrimaryExpression(ctx.primaryExpression());
             }
@@ -407,6 +409,18 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         argument.put("arguments", arguments);
         return argument;
     }
+
+//    @Override
+//    public JSONObject visitSelectionStatement(SelectionStatementContext ctx)
+//    {
+//        JSONObject selectionStatement=new JSONObject();
+//
+//        if(ctx.if)
+//
+//        return selectionStatement;
+//    }
+
+
 }
 
 
