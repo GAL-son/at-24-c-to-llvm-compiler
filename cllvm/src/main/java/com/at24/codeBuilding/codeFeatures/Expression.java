@@ -206,9 +206,15 @@ public class Expression implements Parsable{
                 type = var.type;
             }
         } else {
+            for (String operator : operators) {
+                if(CodeTranslator.isBooleanOperation(operator)) {
+                    return "bool";
+                }
+            }
             String exprType = "";
             for (Expression expression : expressions) {
                 String subExprType = expression.getType(context);
+
                 if(!CodeTranslator.compareTypes(exprType, subExprType)) {
                     exprType = subExprType;
                 }

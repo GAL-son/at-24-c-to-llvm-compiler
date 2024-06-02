@@ -5,6 +5,8 @@ public class CodeTranslator {
 
     public static String typeConverter(String typeName){
         switch (typeName) {
+            case "bool": 
+                return "i1";
             case "int":
                 return "i32";
             case "float":
@@ -28,6 +30,9 @@ public class CodeTranslator {
     private static int getTypeValue(String type) {
         int value = 0;
         switch (type) {
+            case "bool": 
+                value = 0;
+                break;
             case "char":
                 value = 1;
                 break;
@@ -53,6 +58,8 @@ public class CodeTranslator {
 
     public static String operationConverter(String operation) {
         switch (operation) {
+            case "==":
+                return "icmp eq";
             case "+":
                 return "add";
             case "-":
@@ -64,6 +71,15 @@ public class CodeTranslator {
         
             default:
                 return "";
+        }
+    }
+
+    public static boolean isBooleanOperation(String operator) {
+        switch (operator) {
+            case "==":
+                return true;
+            default:
+                return false;
         }
     }
 
