@@ -28,6 +28,10 @@ public class Expression implements Parsable{
     List<String> operators = new LinkedList<>();
     List<Expression> expressions = new LinkedList<>();
 
+    private Expression() {
+
+    }
+
     public Expression(JSONObject initializer) {
         System.out.println("EXPR" + initializer);
         // Check function
@@ -113,30 +117,44 @@ public class Expression implements Parsable{
             System.err.println(operation);
             String regFirst = null;
             String regSecond = null;
+            String firstType = "";
+            String secondType = "";
 
             if(lastReg == null) {
                 System.out.println("ChainFirst");
                 Expression first = expressions.get(exprIndex);
                 System.out.println("ChainFirst is Const" + first.isConst());
                 regFirst = first.getExprIdentifier(context);;
+                firstType = first.getType(context);
                 exprIndex++;
                 if(regFirst == null) {
                     throw new RuntimeException("Missing declaration");
                 }
             } else {
+                firstType = this.getType(context);
                 regFirst = lastReg;
             }
 
+            String comparison = "";
+            
+
             Expression second = expressions.get(exprIndex++);
             regSecond = second.getExprIdentifier(context);
+
+            secondType = second.getType(context);
 
             System.out.println("CURRENT OPERATION"); 
             System.out.println(operation); 
             System.out.println("FirtstArg - " + regFirst); 
             System.out.println("SecondArg - " + regSecond); 
+
+            if(CodeTranslator.isBooleanOperation(operator)) {
+                String maxType = (CodeTranslator.compareTypes(firstType, secondType)) ? firstType : secondType;
+                comparison = (CodeTranslator.isInteger(maxType)) ? "icmp " : "fcmp ";
+            }
             
             String operationCode = String.join(" ", 
-                    operation, 
+                    comparison+operation, 
                     CodeTranslator.typeConverter(getType(context)),
                     regFirst + ",",
                     regSecond
@@ -191,6 +209,12 @@ public class Expression implements Parsable{
     }
 
     public String getType(CodeContext context) {
+        for (String operator : operators) {
+            if(CodeTranslator.isBooleanOperation(operator)) {
+                System.out.println("-----------------------------------------------------------------------------------"+operator);
+                return "bool";
+            }
+        }
         String type = "";
         if(isConst()) {
             // Check values
@@ -271,6 +295,19 @@ public class Expression implements Parsable{
         ret += "operators: " + operators.toString() + "\n";
         ret += "expressions: " + expressions.size() + "\n";
         return ret + "]";
+    }
+
+    public static Expression castTo(Expression expr, String type) {
+        Expression cast = new Expression();
+        if(type.equals("bool")) {
+            cast.operators.add("!=");
+            cast.expressions.add(expr);
+            JSONObject zero = new JSONObject();
+            zero.put("Constant", "0");
+            cast.expressions.add(new Expression(zero));            
+        }
+
+        return cast;
     }
 
   

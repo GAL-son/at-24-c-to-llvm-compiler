@@ -8,7 +8,7 @@ import com.at24.codeBuilding.CodeBuilderVisitor;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "int x = 2; int func(int x, int z); void testVoid(int b) {int a = 1 + 2} int func(int x, int z) {return x + z;} int main(int x) {testVoid(2); int z = 1+func(x, 1); return x + 1 * z;}";
+        String code = "int main() {if(1 == 1) {} return 0;}";
 
         CharStream stream = CharStreams.fromString(code);
 

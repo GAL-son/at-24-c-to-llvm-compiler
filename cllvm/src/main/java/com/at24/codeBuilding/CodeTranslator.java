@@ -59,7 +59,9 @@ public class CodeTranslator {
     public static String operationConverter(String operation) {
         switch (operation) {
             case "==":
-                return "icmp eq";
+                return "eq";
+            case "!=":
+                return "oeq";
             case "+":
                 return "add";
             case "-":
@@ -77,10 +79,17 @@ public class CodeTranslator {
     public static boolean isBooleanOperation(String operator) {
         switch (operator) {
             case "==":
+            case "!=":
                 return true;
             default:
                 return false;
         }
+    }
+    
+    public static boolean isInteger(String type) {
+        type = typeConverter(type);
+
+        return type.contains("i");
     }
 
 }

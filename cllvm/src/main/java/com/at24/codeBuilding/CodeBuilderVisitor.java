@@ -17,6 +17,7 @@ import com.at24.CParser.DeclarationContext;
 import com.at24.CParser.FunctionDefinitionContext;
 import com.at24.CParser.JumpStatementContext;
 import com.at24.CParser.PostfixExpressionContext;
+import com.at24.CParser.SelectionStatementContext;
 import com.at24.codeBuilding.codeFeatures.CodeContext;
 import com.at24.codeBuilding.codeFeatures.Expression;
 import com.at24.codeBuilding.codeFeatures.functions.Function;
@@ -33,6 +34,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     CodeBuilderVisitor parent = null;
     Function currentFunction = null;
 
+    int labelCounter = 1;
     int registerNumber = 1;
 
     public CodeBuilderVisitor() {
@@ -78,7 +80,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
     @Override
     public Variable searchVariable(String variableName) {
-        if(currentFunction.hasParam(variableName)) {
+        if(currentFunction != null && currentFunction.hasParam(variableName)) {
             return currentFunction.getParamVariable(variableName);
         }
 
@@ -293,6 +295,69 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         }
 
         return super.visitPostfixExpression(ctx);
+    }
+    
+    @Override
+    public String visitSelectionStatement(SelectionStatementContext ctx) {
+        JSONVisitor visitor = new JSONVisitor();
+
+        JSONObject expresion = visitor.visitExpression(ctx.expression());
+        Expression ifExpresion = new Expression(expresion);
+
+        System.out.println("Selection");
+        if(ctx.getText().contains("switch")) {
+            // switch
+        } else {
+            String expType = ifExpresion.getType(this);
+
+            if(!expType.equals("bool")) {
+                // Cast to bool
+                Expression boolExpresion = Expression.castTo(ifExpresion, "bool");
+                boolExpresion.parse(this);
+                expType = boolExpresion.getType(this);
+            }
+            
+            String labelId = getLabel();
+            String ifTrueLabel = String.join("", "label.",labelId,".ifTrue");
+            String ifFalseLabel = String.join("", "label.",labelId,".ifFalse");
+            String endLabel = String.join("", "label.",labelId,".end");
+
+            String codeGoToEnd = String.join(" ", "br label", "%"+endLabel);
+
+            String ifCode = String.join(" ", 
+                "br",
+                CodeTranslator.typeConverter(ifExpresion.getType(this)),
+                ifExpresion.getExprIdentifier(this)+",",
+                "label",
+                "%"+ifTrueLabel + ",",
+                "label",
+                "%"+ifFalseLabel
+            );
+
+            emit(ifCode);
+            CodeBuilderVisitor cbv = new CodeBuilderVisitor(this, currentFunction);
+            emit(ifTrueLabel + ":");
+            cbv.visitStatement(ctx.statement(0));
+            emit(codeGoToEnd);
+
+            emit(ifFalseLabel + ":");
+            if(ctx.statement(1) != null ){
+                cbv.visitStatement(ctx.statement(1));
+            }            
+            emit(codeGoToEnd);
+
+            emit(endLabel + ":");
+        }
+        
+        
+
+
+        // TODO Auto-generated method stub
+        return super.visitSelectionStatement(ctx);
+    }
+
+    public String getLabel() {
+        return String.valueOf(labelCounter++);
     }
 
 

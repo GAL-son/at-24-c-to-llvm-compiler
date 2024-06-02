@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import javax.sound.midi.SysexMessage;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +18,7 @@ import com.at24.codeBuilding.codeFeatures.CodeContext;
 import com.at24.codeBuilding.codeFeatures.Expression;
 import com.at24.codeBuilding.codeFeatures.Parsable;
 import com.at24.codeBuilding.codeFeatures.variables.Variable;
+import com.at24.exceptions.SemanticException;
 import com.at24.exceptions.SyntaxException;
 
 public class Function implements Parsable {
@@ -45,6 +48,7 @@ public class Function implements Parsable {
     List<ParamData> params = new LinkedList<>();
     boolean isDefined = false;
     boolean useDefinition = false;
+    boolean hasReturn = false;
     
     
     public Function(JSONObject obj, boolean isDefinition) {
@@ -110,6 +114,7 @@ public class Function implements Parsable {
     }
 
     public void buildReturn(CodeContext context, JSONObject returnExpr) {
+        hasReturn = true;
         Expression retExpr = new Expression(returnExpr);
         String retVal = "";
         boolean isConst = false;
@@ -127,6 +132,10 @@ public class Function implements Parsable {
             // Is variable
             String varName = retExpr.getVariable();
             Variable var = context.searchVariable(varName);
+
+            if(var == null) {
+                throw new SemanticException("Missing variable declaration " + varName);
+            }
 
             String regName = var.readFomVariable(context);
             retVal = regName;
@@ -201,6 +210,15 @@ public class Function implements Parsable {
     }
 
     public void endDeclarationParse(CodeContext context)  {
+        System.out.println("ADD RETURN" + returnType);
+        if(!hasReturn) {
+            if(returnType.equals("void")) {
+                context.emit("ret void");
+            } else {
+                throw new SyntaxException("Missing return statement");
+            }
+        }
+        
         context.emit("}");
     }
 
