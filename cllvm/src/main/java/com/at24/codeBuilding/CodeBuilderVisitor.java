@@ -1,6 +1,8 @@
 package com.at24.codeBuilding;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +60,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     @Override
     public void emit(String emit) {
         if(!isGlobal()) {
-            parent.emit("\t"+emit);
+            parent.emit("   "+emit);
             return;
         }
         code += emit + "\n";
@@ -265,21 +267,11 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
         if(jump.equals("return")) {
             // Do return stuff
-            System.out.println("RETURN!!!!!!!!!!!!!!!!!!!!!!!!");
             handleReturn(jumpStatement);
         }
-
-        // System.out.println("RETURN" + jumpStatement);;
         return super.visitJumpStatement(ctx);
     }
-    @Override
-    public String visitPostfixExpression(PostfixExpressionContext ctx){
 
-        JSONVisitor visitor = new JSONVisitor();
-
-        JSONObject postfixExpression = visitor.visitPostfixExpression(ctx);
-        return super.visitPostfixExpression(ctx);
-    }
     @Override
     public String visitEqualityExpression(CParser.EqualityExpressionContext ctx){
 
@@ -288,7 +280,47 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         JSONObject equalityExpression = visitor.visitEqualityExpression(ctx);
         return super.visitEqualityExpression(ctx);
     }
+    @Override
+    public String visitLogicalOrExpression(CParser.LogicalOrExpressionContext ctx){
 
+        JSONVisitor visitor = new JSONVisitor();
+
+        JSONObject logicalOrExpression = visitor.visitLogicalOrExpression(ctx);
+        return super.visitLogicalOrExpression(ctx);
+    }
+
+    @Override
+    public String visitLogicalAndExpression(CParser.LogicalAndExpressionContext ctx){
+
+        JSONVisitor visitor = new JSONVisitor();
+
+        JSONObject logicalAndExpression = visitor.visitLogicalAndExpression(ctx);
+        return super.visitLogicalAndExpression(ctx);
+    }
+
+
+    @Override
+    public String visitPostfixExpression(PostfixExpressionContext ctx) {
+        JSONVisitor visitor = new JSONVisitor();
+        JSONObject call = visitor.visitPostfixExpression(ctx);
+        
+        if(call.has("arguments")) {
+            // Call function
+            Function func = searchFunction(call.getString("name"));
+            if(func != null) {
+                JSONArray args = call.getJSONArray("arguments");
+                List<String> argsRegs = new ArrayList<>(args.length());
+                for (int i = 0; i < args.length(); i++) {
+                    Expression expr = new Expression(args.getJSONObject(i));
+                    expr.parse(this);
+                    argsRegs.add(expr.getExprIdentifier(this));
+                }
+                emit(func.callFunction(this, argsRegs));
+            }
+        }
+
+        return super.visitPostfixExpression(ctx);
+    }
 
 
     

@@ -1,5 +1,7 @@
 package com.at24.codeBuilding.codeFeatures;
 
+import java.nio.charset.CoderMalfunctionError;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,18 +13,37 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.at24.CParser.ForExpressionContext;
+import com.at24.codeBuilding.CodeBuilderVisitor;
 import com.at24.codeBuilding.CodeTranslator;
+import com.at24.codeBuilding.codeFeatures.functions.Function;
 import com.at24.codeBuilding.codeFeatures.variables.Variable;
+import com.at24.exceptions.SyntaxException;
 
 public class Expression implements Parsable{
     public boolean isVariable = false;
     String value = null;
     String varName = null;
+    String functionCall = null;
+    List<Expression> args = null;
     List<String> operators = new LinkedList<>();
     List<Expression> expressions = new LinkedList<>();
 
     public Expression(JSONObject initializer) {
         System.out.println("EXPR" + initializer);
+        // Check function
+        if(initializer.has("arguments")) {
+            System.out.println("CHECK FUNC");
+            this.functionCall = initializer.getString("name");
+            args = new LinkedList<>();
+            JSONArray array = initializer.getJSONArray("arguments");
+            for(int i = 0; i < array.length(); i++) {
+                JSONObject data = array.getJSONObject(i);
+                args.add(new Expression(data));
+            }
+            System.out.println(this);
+            return;
+        }
+
         // Check direct constant
         if(initializer.has("Constant")) {
             this.value = initializer.getString("Constant");
@@ -116,7 +137,7 @@ public class Expression implements Parsable{
             
             String operationCode = String.join(" ", 
                     operation, 
-                    getType(),
+                    CodeTranslator.typeConverter(getType(context)),
                     regFirst + ",",
                     regSecond
                 );
@@ -124,64 +145,26 @@ public class Expression implements Parsable{
             //System.out.println(operationCode);
             lastReg = saveToRegister(context, operationCode);            
         }
-
-        
-        // for (Expression expression : expressions) {
-        //     //System.out.println("NESTED EXPRESION" + expression.toString());
-        //     if(expression.isExpression()) {
-        //         expression.parse(context);
-        //     } 
-        // }       
-        // System.out.println("EXPRESION");
-
-        // String lastReg = null;
-        // int currentOperationIndex = 0;
-
-        // for (String operator : operators) {
-        //     String operation = CodeTranslator.operationConverter(operator);
-        //     String operationCode = "";
-        //     Expression first;
-        //     String regFirst;
-            
-        //     if(lastReg == null) {
-        //         System.out.println("CURRENT Index" + currentOperationIndex); 
-        //         first = expressions.get(currentOperationIndex++);
-        //         regFirst = first.getExprIdentifier(context);
-        //     }  else {
-        //         regFirst = lastReg;
-        //     }
-            
-            
-        //     Expression second = expressions.get(currentOperationIndex++);
-        //     String regSecond = second.getExprIdentifier(context);          
-            
-        //     System.out.println("CURRENT OPERATION"); 
-        //     System.out.println(operation); 
-        //     System.out.println("FirtstArg - " + regFirst); 
-        //     System.out.println("SecondArg - " + regSecond); 
-
-            
-
-        //     operationCode = String.join(" ", 
-        //         operation, 
-        //         getType(),
-        //         "%" + regFirst + ",",
-        //         "%" + regSecond
-        //     );
-
-        //     lastReg = saveToRegister(context, operationCode);
-        // }
-        
-        // context.assignRegister(this);
     }
 
-    private String getExprIdentifier(CodeContext context) {
+    public String getExprIdentifier(CodeContext context) {
         System.out.println("GET REG EXPR + " + this);
         String ret = "";
-        if(isConst()) {
+        if(isFunctionCall()) {
+            Function funcCall = context.searchFunction(functionCall);
+            if (funcCall == null) {
+                throw new SyntaxException("Missing function declaration: " + functionCall);
+            }
+
+            List<String> argsStrings = new ArrayList<>(args.size());
+
+            for (Expression arg : args) {
+                argsStrings.add(arg.getExprIdentifier(context));
+            }
+            ret = "%" + funcCall.callFunctionWithRegister(context, argsStrings);
+        } else if(isConst()) {
             ret = getValue();
         } else if (isExpression()) {
-            System.out.println("Is Const");
             ret = "%" + context.getRegisterName(this);
         } else {
             if(context.isVariableFunctionArg(varName)) {
@@ -189,19 +172,17 @@ public class Expression implements Parsable{
             } else {
                 Variable var = context.searchVariable(varName);
                 ret = "%"+var.readFomVariable(context);
-            }
-
-
-            
+            }           
         }
         System.out.println("EXPR IDENTIFER " + ret);
         return ret;
     }
 
+    public boolean isFunctionCall() {
+        return functionCall != null;
+    }
+
     public boolean isConst() {
-        System.out.println("\nCHECK CONST");
-        System.out.println(this);
-        System.out.println("value != null ");
         System.out.println((value != null));
         if(value != null) {
             System.out.println("!value.isEmpty()" + !value.isEmpty());
@@ -209,9 +190,38 @@ public class Expression implements Parsable{
         return value != null && (!value.isEmpty());
     }
 
-    public String getType() {
-        return "EXPRTYPE";
+    public String getType(CodeContext context) {
+        String type = "";
+        if(isConst()) {
+            // Check values
+            if(value.contains("\'")) {
+                return "char";
+            } else {
+                return "int";
+            }
+        } else if(isVariable()) {
+            Variable var = context.searchVariable(varName);
+
+            if(var != null) {
+                type = var.type;
+            }
+        } else {
+            String exprType = "";
+            for (Expression expression : expressions) {
+                String subExprType = expression.getType(context);
+                if(!CodeTranslator.compareTypes(exprType, subExprType)) {
+                    exprType = subExprType;
+                }
+            }
+            type = exprType;
+        }
+
+        return type;
     }    
+
+    public boolean isVariable() {
+        return varName != null;
+    }
 
     public String getVariable() {
         return varName;
@@ -248,6 +258,10 @@ public class Expression implements Parsable{
         String ret = "[EXPR: \n";
         ret += "Value: " + value + "\n";
         ret += "Variable: " + varName + "\n";
+        ret += "Func call" + functionCall + "\n";
+        if(functionCall != null) {
+            ret += "funcArgs " + args.size() + "\n";
+        }
         ret += "operators: " + operators.toString() + "\n";
         ret += "expressions: " + expressions.size() + "\n";
         return ret + "]";

@@ -85,7 +85,7 @@ public class Variable implements Parsable {
 
     public void storeToVariable(CodeContext context, Expression expr) {
         String varType = CodeTranslator.typeConverter(type);
-        String assignType = expr.getType();
+        String assignType = expr.getType(context);
 
         expr.parse(context);
         
@@ -93,7 +93,7 @@ public class Variable implements Parsable {
 
         String storeCode = String.join(" ", 
             "store",
-            assignType,
+            CodeTranslator.typeConverter(assignType),
             ((expr.isExpression()) ? exprReg : expr.getValue()) + ",",
             (varType+"*"),
             "%"+identifier

@@ -16,6 +16,7 @@ import com.at24.codeBuilding.codeFeatures.CodeContext;
 import com.at24.codeBuilding.codeFeatures.Expression;
 import com.at24.codeBuilding.codeFeatures.Parsable;
 import com.at24.codeBuilding.codeFeatures.variables.Variable;
+import com.at24.exceptions.SyntaxException;
 
 public class Function implements Parsable {
     private class ParamData {
@@ -67,6 +68,45 @@ public class Function implements Parsable {
 
     public void define() {
         isDefined = true;
+    }
+
+    public String callFunction(CodeContext context, List<String> args) {
+        if(args.size() != params.size()) {
+            throw new SyntaxException("Bad number of arguments!");
+        }
+
+        String callCode = String.join(" ",
+            "call",
+            CodeTranslator.typeConverter(returnType),
+            "@"+identidier,
+            "("
+        );
+
+        for(int i = 0; i < params.size(); i++) {
+            callCode += CodeTranslator.typeConverter(params.get(i).type) + " " + args.get(i);    
+            if(i < params.size() -1 )         {
+                callCode += ", ";
+            }
+        }
+
+        callCode += ")";
+        return callCode;
+    }
+
+    public String callFunctionWithRegister(CodeContext context, List<String> args) {
+        String register = context.borrowRegister();
+        if(args.size() != params.size()) {
+            throw new SyntaxException("Bad number of arguments!");
+        }
+
+        String callCode = String.join(" ",
+            "%" + register,
+            "=",
+            callFunction(context, args)
+        );
+
+        context.emit(callCode);
+        return register;
     }
 
     public void buildReturn(CodeContext context, JSONObject returnExpr) {

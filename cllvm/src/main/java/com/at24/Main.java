@@ -5,11 +5,10 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import com.at24.codeBuilding.CodeBuilderVisitor;
-import com.at24.visitors.JSONVisitor;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "int main(){add(1+2)};int add(a,b){return a+b};";
+        String code = "int main(){int a=1;int b=3;if(2!=2||1==1&&1==1){b=1;}};";
 
         CharStream stream = CharStreams.fromString(code);
 
