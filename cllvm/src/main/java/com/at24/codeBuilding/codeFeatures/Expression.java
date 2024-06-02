@@ -147,7 +147,7 @@ public class Expression implements Parsable{
         }
     }
 
-    private String getExprIdentifier(CodeContext context) {
+    public String getExprIdentifier(CodeContext context) {
         System.out.println("GET REG EXPR + " + this);
         String ret = "";
         if(isFunctionCall()) {

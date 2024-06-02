@@ -1,6 +1,8 @@
 package com.at24.codeBuilding;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -271,10 +273,26 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     }
 
     @Override
-    public String visitPostfixExpression(PostfixExpressionContext arg0) {
-        // Do function call Stuff;
-        // TODO Auto-generated method stub
-        return super.visitPostfixExpression(arg0);
+    public String visitPostfixExpression(PostfixExpressionContext ctx) {
+        JSONVisitor visitor = new JSONVisitor();
+        JSONObject call = visitor.visitPostfixExpression(ctx);
+        
+        if(call.has("arguments")) {
+            // Call function
+            Function func = searchFunction(call.getString("name"));
+            if(func != null) {
+                JSONArray args = call.getJSONArray("arguments");
+                List<String> argsRegs = new ArrayList<>(args.length());
+                for (int i = 0; i < args.length(); i++) {
+                    Expression expr = new Expression(args.getJSONObject(i));
+                    expr.parse(this);
+                    argsRegs.add(expr.getExprIdentifier(this));
+                }
+                emit(func.callFunction(this, argsRegs));
+            }
+        }
+
+        return super.visitPostfixExpression(ctx);
     }
 
 
