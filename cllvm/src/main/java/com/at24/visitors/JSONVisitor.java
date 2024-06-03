@@ -42,9 +42,15 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
         // Init Declarator List
         if (ctx.initDeclaratorList() != null) {
+            System.out.println("nie ejst nullem");
             JSONObject initDeclaratorList = visitInitDeclaratorList(ctx.initDeclaratorList());
             declarationData.put("initDeclaratorList", initDeclaratorList.getJSONArray("initDeclaratorList"));
         }
+        else {
+            System.out.println("nie ejst nullem");
+
+        }
+
 
         // // System.out.println(declarationData);
 
@@ -184,6 +190,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         JSONObject declarationSpecifiers = new JSONObject();
         // System.out.println("START: " + declarationSpecifiers.toString());
         for (DeclarationSpecifierContext declarationCtx : ctx.declarationSpecifier()) {
+            //System.out.println("jeden!");
             // System.out.println("ITER===============");
             Set<String> keySet = new HashSet<>(declarationSpecifiers.keySet());
 
@@ -385,7 +392,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
                 for (ArgumentExpressionListContext actx : ctx.argumentExpressionList()) {
                     funcCall.put("arguments", visitArgumentExpressionList(actx).get("arguments"));
                 }
-                System.out.println(funcCall);
+                //System.out.println(funcCall);
             } else {
                 return visitPrimaryExpression(ctx.primaryExpression());
             }
@@ -425,11 +432,11 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
     JSONArray expressions=new JSONArray();
 
 
-    System.out.println("wejscie test or");
+    //System.out.println("wejscie test or");
 
     if (ctx.children.size()==1)
     {
-        System.out.println("test or stopped");
+        //System.out.println("test or stopped");
         return visitLogicalAndExpression(ctx.logicalAndExpression(0));
     }
 
@@ -437,7 +444,7 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
         expressions.put(visitLogicalAndExpression(aCtx));
     }
     orExpression.put("expressions",expressions);
-    System.out.println("test or"+orExpression);
+    //System.out.println("test or"+orExpression);
 
     return orExpression;
 }
@@ -448,11 +455,11 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
         JSONArray expressions=new JSONArray();
 
 
-        System.out.println("wejscie test and");
+       // System.out.println("wejscie test and");
 
         if (ctx.children.size()==1)
         {
-            System.out.println("test and stopped");
+           // System.out.println("test and stopped");
             return visitInclusiveOrExpression(ctx.inclusiveOrExpression(0));
         }
 
@@ -460,7 +467,7 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
             expressions.put(visitInclusiveOrExpression(iCtx));
         }
         andExpression.put("expressions",expressions);
-        System.out.println("test and"+andExpression);
+       // System.out.println("test and"+andExpression);
 
         return andExpression;
     }
@@ -515,6 +522,26 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
 
 
         return relationalExpr;
+    }
+
+    @Override
+    public JSONObject visitAssignmentExpression(AssignmentExpressionContext ctx)
+    {
+        JSONObject assignmentExpression=new JSONObject();
+        if (ctx.children.size()==1)
+        {
+            return visitConditionalExpression(ctx.conditionalExpression());
+        }
+        if(ctx.unaryExpression()!=null)
+        {
+            assignmentExpression.put("identifier",visitUnaryExpression(ctx.unaryExpression()).get("identifier"));
+        }
+        if (ctx.assignmentExpression()!=null)
+        {
+            assignmentExpression.put("expression",visitAssignmentExpression(ctx.assignmentExpression()));
+        }
+
+        return assignmentExpression;
     }
 
 
