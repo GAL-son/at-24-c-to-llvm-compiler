@@ -36,7 +36,7 @@ public class Expression implements Parsable{
         System.out.println("EXPR" + initializer);
         // Check function
         if(initializer.has("arguments")) {
-            System.out.println("CHECK FUNC");
+            //System.out.println("CHECK FUNC");
             this.functionCall = initializer.getString("name");
             args = new LinkedList<>();
             JSONArray array = initializer.getJSONArray("arguments");
@@ -44,21 +44,21 @@ public class Expression implements Parsable{
                 JSONObject data = array.getJSONObject(i);
                 args.add(new Expression(data));
             }
-            System.out.println(this);
+            //System.out.println(this);
             return;
         }
 
         // Check direct constant
         if(initializer.has("Constant")) {
             this.value = initializer.getString("Constant");
-            System.out.println(this);
+            //System.out.println(this);
             return;
         } 
 
         // Check direct identidier
         if(initializer.has("identifier")) {
             this.varName = initializer.getString("identifier");
-            System.out.println(this);
+            //System.out.println(this);
             return;
         }
 
@@ -94,36 +94,36 @@ public class Expression implements Parsable{
 
     @Override
     public void parse(CodeContext context) throws RuntimeException {
-        System.out.println("------------------\n\nCurrent Expression");
-        System.out.println(this + "\n");
+        //System.out.println("------------------\n\nCurrent Expression");
+        //System.out.println(this + "\n");
         if(!isExpression()) {
-            System.out.println("Not expression");
+            //System.out.println("Not expression");
             return;
         }
-        System.out.println("expression");
-        System.out.println("Child Expressions: " + expressions.size());
+        //System.out.println("expression");
+        //System.out.println("Child Expressions: " + expressions.size());
 
         for (Expression expression : expressions) {
-            System.out.println("CHILD");
+            //System.out.println("CHILD");
             expression.parse(context);
         }
         String lastReg = null;
         int exprIndex = 0;
 
-        System.out.println("LOOP START" + operators.size());
+        //System.out.println("LOOP START" + operators.size());
         for (String operator : operators) {
-            System.out.println("OPERATOR ITER ===================");
+            //System.out.println("OPERATOR ITER ===================");
             String operation = CodeTranslator.operationConverter(operator);
-            System.err.println(operation);
+            //System.err.println(operation);
             String regFirst = null;
             String regSecond = null;
             String firstType = "";
             String secondType = "";
 
             if(lastReg == null) {
-                System.out.println("ChainFirst");
+                //System.out.println("ChainFirst");
                 Expression first = expressions.get(exprIndex);
-                System.out.println("ChainFirst is Const" + first.isConst());
+                //System.out.println("ChainFirst is Const" + first.isConst());
                 regFirst = first.getExprIdentifier(context);;
                 firstType = first.getType(context);
                 exprIndex++;
@@ -143,10 +143,10 @@ public class Expression implements Parsable{
 
             secondType = second.getType(context);
 
-            System.out.println("CURRENT OPERATION"); 
-            System.out.println(operation); 
-            System.out.println("FirtstArg - " + regFirst); 
-            System.out.println("SecondArg - " + regSecond); 
+            //System.out.println("CURRENT OPERATION"); 
+            //System.out.println(operation); 
+            //System.out.println("FirtstArg - " + regFirst); 
+           // System.out.println("SecondArg - " + regSecond); 
 
             if(CodeTranslator.isBooleanOperation(operator)) {
                 String maxType = (CodeTranslator.compareTypes(firstType, secondType)) ? firstType : secondType;
@@ -167,7 +167,7 @@ public class Expression implements Parsable{
     }
 
     public String getExprIdentifier(CodeContext context) {
-        System.out.println("GET REG EXPR + " + this);
+        // System.out.println("GET REG EXPR + " + this);
         String ret = "";
         if(isFunctionCall()) {
             Function funcCall = context.searchFunction(functionCall);
@@ -193,7 +193,7 @@ public class Expression implements Parsable{
                 ret = "%"+var.readFomVariable(context);
             }           
         }
-        System.out.println("EXPR IDENTIFER " + ret);
+        // System.out.println("EXPR IDENTIFER " + ret);
         return ret;
     }
 
@@ -202,9 +202,9 @@ public class Expression implements Parsable{
     }
 
     public boolean isConst() {
-        System.out.println((value != null));
+        // System.out.println((value != null));
         if(value != null) {
-            System.out.println("!value.isEmpty()" + !value.isEmpty());
+            // System.out.println("!value.isEmpty()" + !value.isEmpty());
         }
         return value != null && (!value.isEmpty());
     }
@@ -218,7 +218,7 @@ public class Expression implements Parsable{
         }
         for (String operator : operators) {
             if(CodeTranslator.isBooleanOperation(operator)) {
-                System.out.println("-----------------------------------------------------------------------------------"+operator);
+                // System.out.println("-----------------------------------------------------------------------------------"+operator);
                 return "bool";
             }
         }
@@ -265,7 +265,7 @@ public class Expression implements Parsable{
     }
 
     public boolean isNull() {
-        System.out.println("TEST " + value);
+        // System.out.println("TEST " + value);
 
         if(value != null) {
             return  (value.equals("null") || value.equals("NULL"));
