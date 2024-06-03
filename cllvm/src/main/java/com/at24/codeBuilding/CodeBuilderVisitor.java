@@ -330,18 +330,26 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
         JSONObject expresion = visitor.visitExpression(ctx.expression());
         Expression ifExpresion = new Expression(expresion);
+        String exprRegister = "";
 
         System.out.println("Selection");
         if(ctx.getText().contains("switch")) {
             // switch
         } else {
             String expType = ifExpresion.getType(this);
+            System.out.println("EXPR TYPE " + expType);
 
             if(!expType.equals("bool")) {
                 // Cast to bool
                 Expression boolExpresion = Expression.castTo(ifExpresion, "bool");
                 boolExpresion.parse(this);
                 expType = boolExpresion.getType(this);
+                exprRegister = boolExpresion.getExprIdentifier(this);
+            }
+            else {
+                ifExpresion.parse(this);
+                exprRegister = ifExpresion.getExprIdentifier(this);
+                expType = ifExpresion.getType(this);
             }
             
             String labelId = getLabel();
@@ -353,7 +361,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
             String ifCode = String.join(" ", 
                 "br",
-                CodeTranslator.typeConverter(ifExpresion.getType(this)),
+                CodeTranslator.typeConverter(expType),
                 ifExpresion.getExprIdentifier(this)+",",
                 "label",
                 "%"+ifTrueLabel + ",",
@@ -375,12 +383,8 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
             emit(endLabel + ":");
         }
-        
-        
 
-
-        // TODO Auto-generated method stub
-        return super.visitSelectionStatement(ctx);
+        return code;
     }
 
     public String getLabel() {
