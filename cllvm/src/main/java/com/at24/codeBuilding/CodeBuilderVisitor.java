@@ -293,7 +293,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
         newContext.visitCompoundStatement(ctx.compoundStatement());
 
-        func.endDeclarationParse(newContext);
+        func.endDeclarationParse(this);
         return code;
     }
 

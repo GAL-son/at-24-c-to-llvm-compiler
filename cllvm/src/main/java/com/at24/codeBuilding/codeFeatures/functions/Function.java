@@ -213,6 +213,10 @@ public class Function implements Parsable {
         }
     }
 
+    public String getReturnType() {
+        return returnType;
+    }
+
     public void endDeclarationParse(CodeContext context)  {
         System.out.println("ADD RETURN" + returnType);
         if(!hasReturn) {
@@ -223,7 +227,7 @@ public class Function implements Parsable {
             }
         }
         
-        context.emit("}");
+        context.emit("}\n");
     }
 
     public Variable getParamVariable(String varName) {

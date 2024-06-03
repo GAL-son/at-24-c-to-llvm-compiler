@@ -210,6 +210,12 @@ public class Expression implements Parsable{
     }
 
     public String getType(CodeContext context) {
+        if(isFunctionCall()) {
+            Function func;
+            if((func = context.searchFunction(functionCall)) != null) {
+                return func.getReturnType();
+            }
+        }
         for (String operator : operators) {
             if(CodeTranslator.isBooleanOperation(operator)) {
                 System.out.println("-----------------------------------------------------------------------------------"+operator);
