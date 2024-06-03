@@ -384,13 +384,17 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
     @Override
     public JSONObject visitPostfixExpression(PostfixExpressionContext ctx) {
         JSONObject funcCall = new JSONObject();
-
+      //  System.out.println("that happened1");
 
         if (ctx.primaryExpression() != null) {
-
-            if(ctx.LeftParen()!=null&&ctx.argumentExpressionList()==null)
+           // System.out.println("that happened2");
+            System.out.println(ctx.getText());
+            if(ctx.getText().contains("(")&&ctx.argumentExpressionList().size()==0)
             {
-                System.out.println("that happened");
+                funcCall.put("name", visitPrimaryExpression(ctx.primaryExpression()).get("identifier"));
+
+                //System.out.println("that happened3");
+
                 funcCall.put("arguments",new JSONArray());
             }else
             if (ctx.argumentExpressionList().size() != 0) {
