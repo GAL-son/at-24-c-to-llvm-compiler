@@ -369,6 +369,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         JSONObject jumpStatement = new JSONObject();
 
         // very unfinished
+        System.out.println("jumps");
 
         if (ctx.Return() != null) {
             jumpStatement.put("jump", ctx.Return().getText());
@@ -389,8 +390,14 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
             if (ctx.argumentExpressionList().size() != 0) {
                 funcCall.put("name", visitPrimaryExpression(ctx.primaryExpression()).get("identifier"));
-                for (ArgumentExpressionListContext actx : ctx.argumentExpressionList()) {
-                    funcCall.put("arguments", visitArgumentExpressionList(actx).get("arguments"));
+                if(ctx.LeftParen()!=null&&ctx.argumentExpressionList()==null)
+                {
+                    funcCall.put("arguments",new JSONArray());
+                }else {
+
+                    for (ArgumentExpressionListContext actx : ctx.argumentExpressionList()) {
+                        funcCall.put("arguments", visitArgumentExpressionList(actx).get("arguments"));
+                    }
                 }
                 //System.out.println(funcCall);
             } else {
