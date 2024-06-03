@@ -1,24 +1,55 @@
 package com.at24;
 
+import java.io.IOException;
+
+import javax.management.RuntimeErrorException;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import com.at24.codeBuilding.CodeBuilderVisitor;
+import com.at24.files.FileManager;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "int fibonacci(int limit){int a = 0; b = 1; int result = 0; if(limit == 0) {result = a} else {int counter = 0; while(counter < limit){result = a + b; a = b; b = result}} return result;} void loop() {while(1){while(1){}}";
+        if(args.length == 0) {
+            System.err.println("Missing input file");
+            return;
+        }
+
+        String sourcePath = args[0];
+
+        if(!sourcePath.substring(sourcePath.length()-2).equals(".c")) {
+            System.err.println("Invalid source file format! .c expected");
+            return;
+        }
+
+        String targetPath = null;
+
+        if(args.length < 2) {
+            targetPath = sourcePath + ".ll";
+        }
+        String code = "";
+
+        try {
+            code = FileManager.getFileContents(sourcePath);
+        } catch (Exception e) {
+            System.err.println("Missing "+ sourcePath + " file!");
+            return;
+        }
 
         CharStream stream = CharStreams.fromString(code);
-
         CLexer cLexer = new CLexer(stream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(cLexer);
-
         CParser cParser = new CParser(commonTokenStream);
         CodeBuilderVisitor cVisitor = new CodeBuilderVisitor();
         cVisitor.visitCompilationUnit(cParser.compilationUnit());
 
-        System.out.println(cVisitor.getCode());
+        try {
+            FileManager.writeToFile(targetPath, cVisitor.getCode(), true);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 }
