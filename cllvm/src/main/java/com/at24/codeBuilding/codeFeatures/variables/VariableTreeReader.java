@@ -11,7 +11,7 @@ public class VariableTreeReader {
 
         JSONObject declarator = getDeclarator(declaration);
         // System.out.println("isDeclarationVariable" + declarator);
-        return declarator.has("Identifier");
+        return declarator != null && declarator.has("Identifier");
     }
 
     public static JSONObject getDeclarator(JSONObject declaration) {
@@ -19,7 +19,7 @@ public class VariableTreeReader {
         try {
             initDeclaratorList = declaration.getJSONArray("initDeclaratorList");
         } catch (JSONException e) {
-            throw new RuntimeException("Missing initDeclaratorList");
+            return null;
         }
 
         if (initDeclaratorList.length() != 1) {
@@ -38,7 +38,7 @@ public class VariableTreeReader {
         try {
             initDeclaratorList = declaration.getJSONArray("initDeclaratorList");
         } catch (JSONException e) {
-            throw new RuntimeException("Missing initDeclaratorList");
+            return null;
         }
 
         if (initDeclaratorList.length() != 1) {

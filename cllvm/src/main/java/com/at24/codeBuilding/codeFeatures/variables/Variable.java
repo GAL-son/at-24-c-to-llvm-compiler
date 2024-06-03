@@ -55,7 +55,9 @@ public class Variable implements Parsable {
 
         // Value
         JSONObject initializatorJsonObject = VariableTreeReader.getInitializer(variableDeclaration);
-        this.initializator = new Expression(initializatorJsonObject);
+        if(initializatorJsonObject != null) {
+            this.initializator = new Expression(initializatorJsonObject);
+        }
     }
 
     public int getNumberOfAssignments() {
@@ -89,12 +91,12 @@ public class Variable implements Parsable {
 
         expr.parse(context);
         
-        String exprReg = "%" + context.getRegisterName(expr);
+        String exprReg = expr.getExprIdentifier(context);
 
         String storeCode = String.join(" ", 
             "store",
             CodeTranslator.typeConverter(assignType),
-            ((expr.isExpression()) ? exprReg : expr.getValue()) + ",",
+            exprReg+",",
             (varType+"*"),
             "%"+identifier
         );

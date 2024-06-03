@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.json.JSONArray;
@@ -12,9 +13,12 @@ import org.json.JSONObject;
 
 import com.at24.CBaseVisitor;
 import com.at24.CParser;
+import com.at24.CParser.AssignmentExpressionContext;
 import com.at24.CParser.CompilationUnitContext;
 import com.at24.CParser.DeclarationContext;
+import com.at24.CParser.ExpressionContext;
 import com.at24.CParser.FunctionDefinitionContext;
+import com.at24.CParser.IterationStatementContext;
 import com.at24.CParser.JumpStatementContext;
 import com.at24.CParser.PostfixExpressionContext;
 import com.at24.CParser.SelectionStatementContext;
@@ -33,11 +37,15 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     Map<Expression, String> regs;
     CodeBuilderVisitor parent = null;
     Function currentFunction = null;
+    Stack<String> breakLabels = new Stack<>();
+
+    JSONVisitor jsonVisitor;
 
     int labelCounter = 1;
     int registerNumber = 1;
 
     public CodeBuilderVisitor() {
+        jsonVisitor = new JSONVisitor();
         code = "";
         vars = new HashMap<>();
         funcs = new HashMap<>();
@@ -62,10 +70,16 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     @Override
     public void emit(String emit) {
         if(!isGlobal()) {
-            parent.emit("   "+emit);
+            parent.emit("\t"+emit);
             return;
         }
         code += emit + "\n";
+    }
+
+    @Override
+    public void emit(String code, String preLine) {
+        emit(preLine + code);
+        
     }
 
     @Override
@@ -120,6 +134,8 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     public String getRegisterName(Expression expression) {
         if(regs.containsKey(expression)) {
             return regs.get(expression);
+        } else if (parent != null) {
+            return parent.getRegisterName(expression);
         } else {
             return null;
         }
@@ -127,12 +143,17 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
     @Override
     public String borrowRegister() {
-        return Integer.toString(registerNumber++);
+        if(getCurrentFunction().equals(parent.getCurrentFunction())) {
+            return parent.borrowRegister();
+        }
+        int ret = registerNumber++;
+        return Integer.toString(ret);
+
     }
 
     @Override
     public String assignRegister(Expression expression) {
-        regs.put(expression, Integer.toString(registerNumber++));
+        regs.put(expression, borrowRegister());
         return regs.get(expression);
     }
 
@@ -145,13 +166,13 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         }
 
         // TODO: this shoud be inside variable
-        if (var.dependsOn != null && var.dependsOn.size() > 0) {
-            for (String dependVariable : var.dependsOn) {
-                if (!variableExists(dependVariable)) {
-                    throw new RuntimeException("Missing variable declaration: " + dependVariable);
-                }
-            }
-        }
+        // if (var.dependsOn != null && var.dependsOn.size() > 0) {
+        //     for (String dependVariable : var.dependsOn) {
+        //         if (!variableExists(dependVariable)) {
+        //             throw new RuntimeException("Missing variable declaration: " + dependVariable);
+        //         }
+        //     }
+        // }
 
         vars.put(var.identifier, var);
         var.parse(this);
@@ -214,8 +235,9 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
     @Override
     public String visitDeclaration(DeclarationContext ctx) {
-        // System.out.println("CODE BUILDER + " + ctx.getText());
+        System.out.println("CODE BUILDER + " + ctx.getText());
         JSONObject declaration = new JSONVisitor().visitDeclaration(ctx);
+        System.out.println("CODE BUILDER + " +declaration);
         if (VariableTreeReader.isDeclarationVariable(declaration)) {
             // Do variable declaration
             try {
@@ -232,6 +254,21 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         }
 
         return code;
+    }
+
+    @Override
+    public String visitExpression(ExpressionContext ctx) {
+        System.out.println("expr" + ctx.getText());
+        // TODO Auto-generated method stub
+        return super.visitExpression(ctx);
+    }
+
+    @Override
+    public String visitAssignmentExpression(AssignmentExpressionContext ctx) {
+        
+        System.out.println("ASS" + jsonVisitor.visit(ctx));
+        // TODO Auto-generated method stub
+        return super.visitAssignmentExpression(ctx);
     }
 
     @Override
@@ -355,7 +392,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
             String labelId = getLabel();
             String ifTrueLabel = String.join("", "label.",labelId,".ifTrue");
             String ifFalseLabel = String.join("", "label.",labelId,".ifFalse");
-            String endLabel = String.join("", "label.",labelId,".end");
+            String endLabel = String.join("", "label.",labelId,".ifend");
 
             String codeGoToEnd = String.join(" ", "br label", "%"+endLabel);
 
@@ -387,9 +424,96 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         return code;
     }
 
+    @Override
+    public String visitIterationStatement(IterationStatementContext ctx) {
+        String iterStatement = ctx.getText();       
+
+        if(iterStatement.contains("while")) {
+            // Do while loop
+            JSONObject jsonExpression = jsonVisitor.visit(ctx.expression());
+            Expression whileExpression = new Expression(jsonExpression);
+            String expressionType = whileExpression.getType(this);
+
+            if(!expressionType.equals("bool")) {
+                Expression boolExpression = Expression.castTo(whileExpression, "bool");
+                whileExpression = boolExpression;
+                expressionType = whileExpression.getType(this);
+            }
+            
+            
+            String labelId = getLabel();
+            String labelReset = String.join("", "label.",labelId,".whileReset");
+            String startLabel = String.join("", "label.",labelId,".whileStart");
+            String labelEnd = String.join("", "label.",labelId,".whileExit");
+
+            breakLabels.add(labelEnd);
+
+            //brakeLabel = labelEnd;
+
+            
+            String goToReset = String.join(" ", 
+                "br",
+                "label",
+                "%"+labelReset
+            );
+
+            emit(goToReset);
+            emit(labelReset+":");
+            whileExpression.parse(this);
+
+            String whileExpressionEval = String.join(" ", 
+                "br",
+                CodeTranslator.typeConverter(expressionType),
+                whileExpression.getExprIdentifier(this)+",",
+                "label",
+                "%"+startLabel + ",",
+                "label",
+                "%"+labelEnd
+            );
+            emit(whileExpressionEval);
+            emit(startLabel+":");
+
+            CodeBuilderVisitor nested = new CodeBuilderVisitor(this, currentFunction);
+            nested.visitStatement(ctx.statement());
+
+            
+            emit(goToReset);
+            emit(labelEnd+":");
+            breakLabels.pop();
+        }
+
+        return code;
+    }
+
     public String getLabel() {
+        if(getCurrentFunction().equals(parent.getCurrentFunction())) {
+            return parent.getLabel();
+        }
         return String.valueOf(labelCounter++);
     }
+
+    public String searchBreakLabel() {
+        if(parent != null) {
+            return parent.searchBreakLabel();
+        } else if (breakLabels.empty()) {
+            return null;
+        } else {
+            return breakLabels.peek();
+        }
+    }
+
+    public String getCurrentFunction() {
+        if(currentFunction != null) {
+            return currentFunction.getIdentifier();
+        }
+
+        return null;
+    }
+
+    
+
+
+    
 
 
     

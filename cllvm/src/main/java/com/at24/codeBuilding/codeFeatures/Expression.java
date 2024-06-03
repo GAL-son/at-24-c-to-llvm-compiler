@@ -153,9 +153,10 @@ public class Expression implements Parsable{
                 comparison = (CodeTranslator.isInteger(maxType)) ? "icmp " : "fcmp ";
             }
             
+            String finalType = CodeTranslator.compareTypes(firstType, secondType) ? firstType : secondType;
             String operationCode = String.join(" ", 
                     comparison+operation, 
-                    CodeTranslator.typeConverter(getType(context)),
+                    CodeTranslator.typeConverter(finalType),
                     regFirst + ",",
                     regSecond
                 );

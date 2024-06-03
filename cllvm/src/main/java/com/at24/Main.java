@@ -8,7 +8,7 @@ import com.at24.codeBuilding.CodeBuilderVisitor;
 
 public class Main {
     public static void main(String[] args) {
-        String code = "int main() {if(1==1) {int z = 1 + 1} else {int y = 2} return 0;}";
+        String code = "int fibonacci(int limit){int a = 0; b = 1; int result = 0; if(limit == 0) {result = a} else {int counter = 0; while(counter < limit){result = a + b; a = b; b = result}} return result;} void loop() {while(1){while(1){}}";
 
         CharStream stream = CharStreams.fromString(code);
 

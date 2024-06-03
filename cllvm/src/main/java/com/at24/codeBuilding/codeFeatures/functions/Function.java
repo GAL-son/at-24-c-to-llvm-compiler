@@ -131,14 +131,18 @@ public class Function implements Parsable {
         } else {
             // Is variable
             String varName = retExpr.getVariable();
-            Variable var = context.searchVariable(varName);
+            if(context.isVariableFunctionArg(varName)) {
+                retVal = varName;
+            } else {
+                Variable var = context.searchVariable(varName);
 
-            if(var == null) {
-                throw new SemanticException("Missing variable declaration " + varName);
+                if(var == null) {
+                    throw new SemanticException("Missing variable declaration " + varName);
+                }
+
+                String regName = var.readFomVariable(context);
+                retVal = regName;
             }
-
-            String regName = var.readFomVariable(context);
-            retVal = regName;
         }
 
         String returnStatemet = String.join(" ", 

@@ -61,7 +61,15 @@ public class CodeTranslator {
             case "==":
                 return "eq";
             case "!=":
-                return "oeq";
+                return "ne";
+            case ">":
+                return "sgt";
+            case ">=":
+                return "sge";
+            case "<":
+                return "slt";
+            case "<=":
+                return "sle";
             case "+":
                 return "add";
             case "-":
@@ -80,6 +88,10 @@ public class CodeTranslator {
         switch (operator) {
             case "==":
             case "!=":
+            case ">":
+            case ">=":
+            case "<":
+            case "<=":
                 return true;
             default:
                 return false;
