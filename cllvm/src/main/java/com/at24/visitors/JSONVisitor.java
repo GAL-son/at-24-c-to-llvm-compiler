@@ -42,17 +42,17 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
         // Init Declarator List
         if (ctx.initDeclaratorList() != null) {
-            System.out.println("nie ejst nullem");
+            // System.out.println("nie ejst nullem");
             JSONObject initDeclaratorList = visitInitDeclaratorList(ctx.initDeclaratorList());
             declarationData.put("initDeclaratorList", initDeclaratorList.getJSONArray("initDeclaratorList"));
         }
         else {
-            System.out.println("nie ejst nullem");
+            // System.out.println("nie ejst nullem");
 
         }
 
 
-        // // System.out.println(declarationData);
+        // // // System.out.println(declarationData);
 
         return declarationData;
     }
@@ -137,16 +137,16 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         JSONObject Parameter = new JSONObject();
 
         if (ctx.declarationSpecifiers() != null) {
-            // System.out.println("washere dec");
+            // // System.out.println("washere dec");
             Parameter.put("type", visitDeclarationSpecifiers(ctx.declarationSpecifiers()));
         }
 
         if (ctx.declarator() != null) {
-            // System.out.println("washere dec");
+            // // System.out.println("washere dec");
             Parameter.put("identifier", visitDeclarator(ctx.declarator()));
         }
-        // System.out.println("parameter");
-        // System.out.println(Parameter);
+        // // System.out.println("parameter");
+        // // System.out.println(Parameter);
         return Parameter;
     }
 
@@ -188,16 +188,16 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
     @Override
     public JSONObject visitDeclarationSpecifiers(DeclarationSpecifiersContext ctx) {
         JSONObject declarationSpecifiers = new JSONObject();
-        // System.out.println("START: " + declarationSpecifiers.toString());
+        // // System.out.println("START: " + declarationSpecifiers.toString());
         for (DeclarationSpecifierContext declarationCtx : ctx.declarationSpecifier()) {
-            //System.out.println("jeden!");
-            // System.out.println("ITER===============");
+            //// System.out.println("jeden!");
+            // // System.out.println("ITER===============");
             Set<String> keySet = new HashSet<>(declarationSpecifiers.keySet());
 
 
             JSONObject result = visitDeclarationSpecifier(declarationCtx);
             Set<String> resultKeySet = result.keySet();
-            // System.out.println("test final: " + declarationSpecifiers.toString());
+            // // System.out.println("test final: " + declarationSpecifiers.toString());
             keySet.retainAll(resultKeySet);
 
             if (!keySet.isEmpty()) {
@@ -205,14 +205,14 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
             }
 
             for (String key : resultKeySet) {
-                // System.out.println("PUT " + key + ":" + result.get(key));
-                // System.out.println("before put: " + declarationSpecifiers.toString());
+                // // System.out.println("PUT " + key + ":" + result.get(key));
+                // // System.out.println("before put: " + declarationSpecifiers.toString());
                 declarationSpecifiers.put(key, result.get(key));
-                // System.out.println("after put: " + declarationSpecifiers.toString());
+                // // System.out.println("after put: " + declarationSpecifiers.toString());
             }
         }
 
-        // System.out.println("final: " + declarationSpecifiers.toString());
+        // // System.out.println("final: " + declarationSpecifiers.toString());
         return declarationSpecifiers;
     }
 
@@ -267,7 +267,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
 
         if (!operators.isEmpty()) {
-            // System.out.println("not empty");
+            // // System.out.println("not empty");
             additiveExpr.put("expressions", expressions);
             additiveExpr.put("operators", operators);
         } else {
@@ -305,7 +305,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         } else {
             multiplicativeExpr = (Support);
         }
-        // System.out.println("end");
+        // // System.out.println("end");
         return multiplicativeExpr;
     }
 
@@ -318,22 +318,22 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
             JSONObject declarationSpecifiers = new JSONObject();
             declarationSpecifiers = visitDeclarationSpecifiers(ctx.declarationSpecifiers());
             functionDefinition.put("declarationSpecifiers", declarationSpecifiers);
-            // System.out.println("fdef");
+            // // System.out.println("fdef");
         }
         if (ctx.declarator() != null) {
             JSONObject declarator = new JSONObject();
             declarator = visitDeclarator(ctx.declarator());
             functionDefinition.put("declarator", declarator);
-            // System.out.println("fdec");
+            // // System.out.println("fdec");
         }
         if (ctx.compoundStatement() != null) {
             JSONObject compoundStatement = new JSONObject();
             compoundStatement = visitCompoundStatement(ctx.compoundStatement());
             functionDefinition.put("compoundStatement", compoundStatement);
-            // System.out.println("fcst");
+            // // System.out.println("fcst");
         }
 
-        // System.out.println(functionDefinition);
+        // // System.out.println(functionDefinition);
         return functionDefinition;
     }
 
@@ -369,7 +369,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         JSONObject jumpStatement = new JSONObject();
 
         // very unfinished
-        System.out.println("jumps");
+        // System.out.println("jumps");
 
         if (ctx.Return() != null) {
             jumpStatement.put("jump", ctx.Return().getText());
@@ -384,16 +384,16 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
     @Override
     public JSONObject visitPostfixExpression(PostfixExpressionContext ctx) {
         JSONObject funcCall = new JSONObject();
-      //  System.out.println("that happened1");
+      //  // System.out.println("that happened1");
 
         if (ctx.primaryExpression() != null) {
-           // System.out.println("that happened2");
-            System.out.println(ctx.getText());
+           // // System.out.println("that happened2");
+            // System.out.println(ctx.getText());
             if(ctx.getText().contains("(")&&ctx.argumentExpressionList().size()==0)
             {
                 funcCall.put("name", visitPrimaryExpression(ctx.primaryExpression()).get("identifier"));
 
-                //System.out.println("that happened3");
+                //// System.out.println("that happened3");
 
                 funcCall.put("arguments",new JSONArray());
             }else
@@ -405,7 +405,7 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
                         funcCall.put("arguments", visitArgumentExpressionList(actx).get("arguments"));
                     }
 
-                //System.out.println(funcCall);
+                //// System.out.println(funcCall);
             } else {
                 return visitPrimaryExpression(ctx.primaryExpression());
             }
@@ -445,11 +445,11 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
     JSONArray expressions=new JSONArray();
 
 
-    //System.out.println("wejscie test or");
+    //// System.out.println("wejscie test or");
 
     if (ctx.children.size()==1)
     {
-        //System.out.println("test or stopped");
+        //// System.out.println("test or stopped");
         return visitLogicalAndExpression(ctx.logicalAndExpression(0));
     }
 
@@ -457,7 +457,7 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
         expressions.put(visitLogicalAndExpression(aCtx));
     }
     orExpression.put("expressions",expressions);
-    //System.out.println("test or"+orExpression);
+    //// System.out.println("test or"+orExpression);
 
     return orExpression;
 }
@@ -468,11 +468,11 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
         JSONArray expressions=new JSONArray();
 
 
-       // System.out.println("wejscie test and");
+       // // System.out.println("wejscie test and");
 
         if (ctx.children.size()==1)
         {
-           // System.out.println("test and stopped");
+           // // System.out.println("test and stopped");
             return visitInclusiveOrExpression(ctx.inclusiveOrExpression(0));
         }
 
@@ -480,7 +480,7 @@ public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
             expressions.put(visitInclusiveOrExpression(iCtx));
         }
         andExpression.put("expressions",expressions);
-       // System.out.println("test and"+andExpression);
+       // // System.out.println("test and"+andExpression);
 
         return andExpression;
     }

@@ -155,7 +155,7 @@ public class Function implements Parsable {
     }
 
     private void setData(JSONObject funcData) {
-        // System.out.println(" PARSED DATA" + funcData);
+        // // System.out.println(" PARSED DATA" + funcData);
         this.identidier = funcData.getString("id");
         this.returnType = funcData.getString("returnType");
         JSONArray args = funcData.getJSONArray("parameters");
@@ -218,7 +218,7 @@ public class Function implements Parsable {
     }
 
     public void endDeclarationParse(CodeContext context)  {
-        System.out.println("ADD RETURN" + returnType);
+        // System.out.println("ADD RETURN" + returnType);
         if(!hasReturn) {
             if(returnType.equals("void")) {
                 context.emit("ret void");

@@ -187,7 +187,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     }
 
     private void declareFunction(JSONObject functionDeclaration) {
-        // System.out.println("functionDeclaration " + functionDeclaration);
+        // // System.out.println("functionDeclaration " + functionDeclaration);
         Function func = new Function(functionDeclaration, false);
         funcs.put(func.getIdentifier(), func);
     }
@@ -213,7 +213,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
             throw new RuntimeException("Return statement outside function body");
         }
 
-        System.out.println("DO RETURN STUFF");
+        // System.out.println("DO RETURN STUFF");
         currentFunction.buildReturn(this, jumpStatement.getJSONObject("expression"));
     }
 
@@ -247,18 +247,24 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     }
 
     @Override
-    public String visitExpression(ExpressionContext ctx) {
-        System.out.println("expr" + ctx.getText());
-        // TODO Auto-generated method stub
-        return super.visitExpression(ctx);
-    }
-
-    @Override
     public String visitAssignmentExpression(AssignmentExpressionContext ctx) {
+        if(ctx.conditionalExpression()!= null) {
+            return visitConditionalExpression(ctx.conditionalExpression());
+        }
         
-        System.out.println("ASS" + jsonVisitor.visit(ctx));
+        JSONObject assignData = jsonVisitor.visit(ctx);
         // TODO Auto-generated method stub
-        return super.visitAssignmentExpression(ctx);
+        String varName = assignData.getString("identifier");
+        // System.out.println(assignData);
+
+        Variable var = searchVariable(varName);
+        if(var == null) {
+            throw new RuntimeException("Usage of undefined variable");
+        }
+
+        var.storeToVariable(this, new Expression(assignData.getJSONObject("expression")));
+
+        return code;
     }
 
     @Override
@@ -359,12 +365,12 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         Expression ifExpresion = new Expression(expresion);
         String exprRegister = "";
 
-        System.out.println("Selection");
+        // System.out.println("Selection");
         if(ctx.getText().contains("switch")) {
             // switch
         } else {
             String expType = ifExpresion.getType(this);
-            System.out.println("EXPR TYPE " + expType);
+            // System.out.println("EXPR TYPE " + expType);
 
             if(!expType.equals("bool")) {
                 // Cast to bool

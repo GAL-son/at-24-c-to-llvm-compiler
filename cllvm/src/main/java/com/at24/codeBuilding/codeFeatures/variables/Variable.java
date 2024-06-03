@@ -39,7 +39,7 @@ public class Variable implements Parsable {
 
         // Name
         JSONObject declarator = VariableTreeReader.getDeclarator(variableDeclaration);
-        System.out.println(declarator + " ID:" + VariableTreeReader.getVariableIdentifier(declarator));
+        // System.out.println(declarator + " ID:" + VariableTreeReader.getVariableIdentifier(declarator));
         this.identifier = VariableTreeReader.getVariableIdentifier(declarator);
 
         // type
@@ -122,14 +122,14 @@ public class Variable implements Parsable {
     public String parseGlobal() {
         isGlobal = true;
         String base = "";
-        System.out.println(type);
+        // System.out.println(type);
         base += "@" +
                 this.identifier + 
                 " = " +
                 ((isConst) ? "constant" : "global") + " " + 
                 CodeTranslator.typeConverter(this.type);
 
-        System.out.println(initializator.isExpression());
+        // System.out.println(initializator.isExpression());
 
         if (initializator == null || initializator.isNull()) {
             base += "* null";

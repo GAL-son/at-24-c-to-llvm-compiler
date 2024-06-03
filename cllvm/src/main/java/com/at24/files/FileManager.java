@@ -32,11 +32,10 @@ public class FileManager {
 
         File f = new File(System.getProperty("user.dir") + fileName);
         f.createNewFile();
-        // if(!f.exists() && !f.isDirectory()) { 
-            
-        // }
+
         BufferedWriter writer = new BufferedWriter(new FileWriter(f));
         writer.write(content);
+        System.err.println(System.getProperty("user.dir") + fileName);
         
         writer.close();
     }
