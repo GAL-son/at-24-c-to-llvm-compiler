@@ -377,14 +377,16 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
     public JSONObject visitPostfixExpression(PostfixExpressionContext ctx) {
         JSONObject funcCall = new JSONObject();
 
+
         if (ctx.primaryExpression() != null) {
-            //System.out.println(ctx.argumentExpressionList());
-            if (ctx.argumentExpressionList().size()!=0) {
+
+            if (ctx.argumentExpressionList().size() != 0) {
                 funcCall.put("name", visitPrimaryExpression(ctx.primaryExpression()).get("identifier"));
                 for (ArgumentExpressionListContext actx : ctx.argumentExpressionList()) {
                     funcCall.put("arguments", visitArgumentExpressionList(actx).get("arguments"));
                 }
-            }else {
+                System.out.println(funcCall);
+            } else {
                 return visitPrimaryExpression(ctx.primaryExpression());
             }
 
@@ -407,6 +409,115 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
         argument.put("arguments", arguments);
         return argument;
     }
+
+//    @Override
+//    public JSONObject visitSelectionStatement(SelectionStatementContext ctx)
+//    {
+//        JSONObject selectionStatement=new JSONObject();
+//
+//        if(ctx.if)
+//
+//        return selectionStatement;
+//    }
+@Override
+public JSONObject visitLogicalOrExpression(LogicalOrExpressionContext ctx) {
+    JSONObject orExpression = new JSONObject();
+    JSONArray expressions=new JSONArray();
+
+
+    System.out.println("wejscie test or");
+
+    if (ctx.children.size()==1)
+    {
+        System.out.println("test or stopped");
+        return visitLogicalAndExpression(ctx.logicalAndExpression(0));
+    }
+
+    for (LogicalAndExpressionContext aCtx : ctx.logicalAndExpression()) {
+        expressions.put(visitLogicalAndExpression(aCtx));
+    }
+    orExpression.put("expressions",expressions);
+    System.out.println("test or"+orExpression);
+
+    return orExpression;
+}
+
+    @Override
+    public JSONObject visitLogicalAndExpression(LogicalAndExpressionContext ctx) {
+        JSONObject andExpression = new JSONObject();
+        JSONArray expressions=new JSONArray();
+
+
+        System.out.println("wejscie test and");
+
+        if (ctx.children.size()==1)
+        {
+            System.out.println("test and stopped");
+            return visitInclusiveOrExpression(ctx.inclusiveOrExpression(0));
+        }
+
+        for (InclusiveOrExpressionContext iCtx : ctx.inclusiveOrExpression()) {
+            expressions.put(visitInclusiveOrExpression(iCtx));
+        }
+        andExpression.put("expressions",expressions);
+        System.out.println("test and"+andExpression);
+
+        return andExpression;
+    }
+
+    @Override
+    public JSONObject visitEqualityExpression(EqualityExpressionContext ctx) {
+        JSONObject equalityExpr = new JSONObject();
+        JSONArray expressions = new JSONArray();
+        JSONArray operators = new JSONArray();
+
+        if (ctx.children.size() == 1)
+            return visitRelationalExpression(ctx.relationalExpression(0));
+
+        for (RelationalExpressionContext relCtx : ctx.relationalExpression()) {
+            expressions.put(visitRelationalExpression(relCtx));
+        }
+
+        for (int i = 1; i < ctx.getChildCount(); i += 2) {
+            String operator = ctx.getChild(i).getText();
+            operators.put(operator);
+        }
+
+
+        equalityExpr.put("expressions", expressions);
+        equalityExpr.put("operators", operators);
+
+
+        return equalityExpr;
+    }
+
+    @Override
+    public JSONObject visitRelationalExpression(RelationalExpressionContext ctx) {
+        JSONObject relationalExpr = new JSONObject();
+        JSONArray expressions = new JSONArray();
+        JSONArray operators = new JSONArray();
+
+        if (ctx.children.size() == 1)
+            return visitShiftExpression(ctx.shiftExpression(0));
+
+        for (ShiftExpressionContext sCtx : ctx.shiftExpression()) {
+            expressions.put(visitShiftExpression(sCtx));
+        }
+
+        for (int i = 1; i < ctx.getChildCount(); i += 2) {
+            String operator = ctx.getChild(i).getText();
+            operators.put(operator);
+        }
+
+
+        relationalExpr.put("expressions", expressions);
+        relationalExpr.put("operators", operators);
+
+
+        return relationalExpr;
+    }
+
+
 }
 
 

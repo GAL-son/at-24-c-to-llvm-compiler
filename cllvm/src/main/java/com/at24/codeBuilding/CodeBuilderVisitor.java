@@ -275,6 +275,33 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
     }
 
     @Override
+    public String visitEqualityExpression(CParser.EqualityExpressionContext ctx){
+
+        JSONVisitor visitor = new JSONVisitor();
+
+        JSONObject equalityExpression = visitor.visitEqualityExpression(ctx);
+        return super.visitEqualityExpression(ctx);
+    }
+    @Override
+    public String visitLogicalOrExpression(CParser.LogicalOrExpressionContext ctx){
+
+        JSONVisitor visitor = new JSONVisitor();
+
+        JSONObject logicalOrExpression = visitor.visitLogicalOrExpression(ctx);
+        return super.visitLogicalOrExpression(ctx);
+    }
+
+    @Override
+    public String visitLogicalAndExpression(CParser.LogicalAndExpressionContext ctx){
+
+        JSONVisitor visitor = new JSONVisitor();
+
+        JSONObject logicalAndExpression = visitor.visitLogicalAndExpression(ctx);
+        return super.visitLogicalAndExpression(ctx);
+    }
+
+
+    @Override
     public String visitPostfixExpression(PostfixExpressionContext ctx) {
         JSONVisitor visitor = new JSONVisitor();
         JSONObject call = visitor.visitPostfixExpression(ctx);
