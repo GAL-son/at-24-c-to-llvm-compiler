@@ -1,3 +1,4 @@
-.vscode
-.antlr
+.vscode/
+.antlr/
+./testFiles
 cllvm/target/

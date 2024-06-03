@@ -161,18 +161,10 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
         Variable var = new Variable(variableDeclaration);
 
         // If current context has double declaration
-        if (vars.containsKey(var.identifier)) {
+        if (searchVariable(var.identifier) != null) {
             throw new DoubleDeclarationException();
         }
 
-        // TODO: this shoud be inside variable
-        // if (var.dependsOn != null && var.dependsOn.size() > 0) {
-        //     for (String dependVariable : var.dependsOn) {
-        //         if (!variableExists(dependVariable)) {
-        //             throw new RuntimeException("Missing variable declaration: " + dependVariable);
-        //         }
-        //     }
-        // }
 
         vars.put(var.identifier, var);
         var.parse(this);
@@ -235,9 +227,7 @@ public class CodeBuilderVisitor extends CBaseVisitor<String> implements CodeCont
 
     @Override
     public String visitDeclaration(DeclarationContext ctx) {
-        System.out.println("CODE BUILDER + " + ctx.getText());
-        JSONObject declaration = new JSONVisitor().visitDeclaration(ctx);
-        System.out.println("CODE BUILDER + " +declaration);
+        JSONObject declaration = new JSONVisitor().visitDeclaration(ctx);;
         if (VariableTreeReader.isDeclarationVariable(declaration)) {
             // Do variable declaration
             try {
