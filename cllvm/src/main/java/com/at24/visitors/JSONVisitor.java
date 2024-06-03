@@ -388,17 +388,19 @@ public class JSONVisitor extends CBaseVisitor<JSONObject> {
 
         if (ctx.primaryExpression() != null) {
 
+            if(ctx.LeftParen()!=null&&ctx.argumentExpressionList()==null)
+            {
+                System.out.println("that happened");
+                funcCall.put("arguments",new JSONArray());
+            }else
             if (ctx.argumentExpressionList().size() != 0) {
                 funcCall.put("name", visitPrimaryExpression(ctx.primaryExpression()).get("identifier"));
-                if(ctx.LeftParen()!=null&&ctx.argumentExpressionList()==null)
-                {
-                    funcCall.put("arguments",new JSONArray());
-                }else {
+
 
                     for (ArgumentExpressionListContext actx : ctx.argumentExpressionList()) {
                         funcCall.put("arguments", visitArgumentExpressionList(actx).get("arguments"));
                     }
-                }
+
                 //System.out.println(funcCall);
             } else {
                 return visitPrimaryExpression(ctx.primaryExpression());
