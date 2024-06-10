@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class FileManager {
     public static String getFileContents(String path) throws IOException {
-        path = System.getProperty("user.dir") + path;
+        path = System.getProperty("user.dir") + "\\" + path;
         System.out.println(Paths.get(path));
         String content;
         Scanner scanner = new Scanner(Paths.get(path), StandardCharsets.UTF_8.name());
@@ -30,12 +30,12 @@ public class FileManager {
 
     public static void writeToFile(String fileName, String content, boolean override) throws IOException {
 
-        File f = new File(System.getProperty("user.dir") + fileName);
+        File f = new File(System.getProperty("user.dir") + "\\" + fileName);
         f.createNewFile();
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(f));
         writer.write(content);
-        System.err.println(System.getProperty("user.dir") + fileName);
+        System.err.println(System.getProperty("user.dir") + "\\" + fileName);
         
         writer.close();
     }
