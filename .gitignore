@@ -1,4 +1,5 @@
 .vscode/
 .antlr/
+cllvm/.antlr
 cllvm/target/
 testFiles/*

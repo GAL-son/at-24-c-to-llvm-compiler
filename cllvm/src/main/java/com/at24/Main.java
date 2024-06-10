@@ -1,9 +1,5 @@
 package com.at24;
 
-import java.io.IOException;
-
-import javax.management.RuntimeErrorException;
-
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -29,6 +25,8 @@ public class Main {
 
         if(args.length < 2) {
             targetPath = sourcePath + ".ll";
+        } else {
+            targetPath = args[1];
         }
         String code = "";
 
@@ -36,6 +34,7 @@ public class Main {
             code = FileManager.getFileContents(sourcePath);
         } catch (Exception e) {
             System.err.println("Missing "+ sourcePath + " file!");
+            System.err.println(e.getMessage());
             return;
         }
 
@@ -47,6 +46,7 @@ public class Main {
         cVisitor.visitCompilationUnit(cParser.compilationUnit());
 
         try {
+            System.out.println(targetPath);
             FileManager.writeToFile(targetPath, cVisitor.getCode(), true);
         } catch (Exception e) {
             System.err.println(e.getMessage());
