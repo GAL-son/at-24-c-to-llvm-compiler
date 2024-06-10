@@ -1,11 +1,14 @@
 # Usage of the `compile.bat`
 
+You can use provided `compile.bat` script to make building and runing compiler easier.
+Script is located in `tools` directory.
+
+> __NOTE:__ Script must be executed from its current location
+
 # Build
 To build a project you will require Maven executable to be in PATH system variable.
 If that condition is met you can use scriopt with `-b` or `--build` flag.
 You can also build project with IDE of your choice as long as it supports maven.
-
-> __NOTE:__ Script must be executed from its current location
 
 # Running compiler
 
